@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FcGoogle } from 'react-icons/fc';
 import { FiUser, FiMail, FiLock } from 'react-icons/fi';
 
 import Input from '../components/Input';
 import SocialButton from '../components/SocialButton';
+import authService from '../services/authService';
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
@@ -13,16 +14,41 @@ const SignupPage = () => {
     email: '',
     password: '',
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, you'd call your signup API here
-    console.log('Form submitted:', formData);
-    alert('Signup successful! (Frontend only)');
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await authService.signup(
+        formData.name,
+        formData.email,
+        formData.password
+      );
+
+      if (response.data.token) {
+        // Automatically log the user in upon successful signup
+        localStorage.setItem('user_token', response.data.token);
+        localStorage.setItem('user_role', response.data.role);
+
+        // Redirect to the dashboard
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      // Assuming the backend sends an error if the email is already in use
+      setError('An account with this email already exists.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogleSignup = () => {
@@ -49,9 +75,10 @@ const SignupPage = () => {
               sign in to your existing account
             </Link>
           </p>
+          {error && <p className="mt-2 text-center text-sm text-red-600">{error}</p>}
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px flex flex-col gap-4">
+          <div className="rounded-md shadow-sm flex flex-col gap-4">
             <Input id="name" type="text" placeholder="Full Name" icon={FiUser} value={formData.name} onChange={handleChange} />
             <Input id="email" type="email" placeholder="Email address" icon={FiMail} value={formData.email} onChange={handleChange} />
             <Input id="password" type="password" placeholder="Password" icon={FiLock} value={formData.password} onChange={handleChange} />
@@ -60,9 +87,10 @@ const SignupPage = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-green-300"
             >
-              Sign up
+              {loading ? 'Creating account...' : 'Sign up'}
             </button>
           </div>
         </form>
