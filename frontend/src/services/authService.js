@@ -31,10 +31,19 @@ const login = (email, password) => {
   });
 };
 
+/**
+ * Removes user token and role from localStorage.
+ */
+const logout = () => {
+  localStorage.removeItem('user_token');
+  localStorage.removeItem('user_role');
+};
+
 // We can add a getCurrentUser method later
 const authService = {
   signup,
   login,
+  logout,
 };
 
 export default authService;
