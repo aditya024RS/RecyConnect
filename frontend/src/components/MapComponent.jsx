@@ -28,12 +28,12 @@ const userIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-const MapComponent = ({ userPosition, recyclers }) => {
+const MapComponent = ({ userPosition, recyclers, onBookClick }) => {
   // Default center (Kolkata)
   const defaultPosition = [22.5726, 88.3639];
 
   return (
-    <MapContainer center={defaultPosition} zoom={13} style={{ height: '60vh', width: '100%' }} className="rounded-lg shadow-lg">
+    <MapContainer center={defaultPosition} zoom={13} style={{ height: '60vh', width: '100%', zIndex: 0 }} className="rounded-lg shadow-lg relative z-0">
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -45,6 +45,12 @@ const MapComponent = ({ userPosition, recyclers }) => {
           <Popup>
             <div className="font-bold text-lg">{recycler.name}</div>
             <p>Accepts: {recycler.wasteTypes.join(', ')}</p>
+            <button 
+              onClick={() => onBookClick(recycler)} 
+              className="mt-2 w-full bg-green-500 text-white text-sm font-bold py-1 px-3 rounded hover:bg-green-600 transition-colors"
+            >
+              Book Pickup
+            </button>
           </Popup>
         </Marker>
       ))}

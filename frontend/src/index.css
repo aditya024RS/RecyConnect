@@ -19,3 +19,17 @@
     }
   }
 }
+
+/* Ensure Leaflet controls don't overlap navbar */
+.leaflet-top {
+  top: 60px !important; /* Adjust based on your navbar height */
+}
+
+.leaflet-control {
+  z-index: 10 !important;
+}
+
+/* Fix for map tiles appearing above navbar */
+.leaflet-pane {
+  z-index: 1 !important;
+}

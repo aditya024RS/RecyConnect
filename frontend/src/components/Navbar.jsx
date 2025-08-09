@@ -31,7 +31,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-md w-full sticky top-0 z-50">
+    <nav className="bg-white shadow-md w-full sticky top-0 z-[1000]">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         <Link to="/" className="text-2xl font-bold text-green-600">
           RecyConnect ♻️
