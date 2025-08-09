@@ -2,12 +2,17 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import DashboardPage from './pages/DashboardPage';
+
+// Import Pages
 import HomePage from './pages/HomePage';
-import LearnPage from './pages/LearnPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import FindServicesPage from './pages/FindServicesPage';
+import LearnPage from './pages/LearnPage';
+import DashboardPage from './pages/DashboardPage';
+
+// Import the ProtectedRoute component
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -15,13 +20,18 @@ function App() {
       <Navbar />
       <main className="flex-grow container mx-auto p-6">
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/services" element={<FindServicesPage />} />
           <Route path="/learn" element={<LearnPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          {/* We will add more routes for Learn, Dashboard etc. later */}
+
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            {/* You can add more protected routes here later */}
+          </Route>
         </Routes>
       </main>
       <Footer />
