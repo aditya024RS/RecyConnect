@@ -1,27 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaLeaf, FaTrophy, FaCheckCircle, FaStar } from 'react-icons/fa';
+import api from '../services/api'; // 👈 Import our new authenticated api service
 
-// Mock data for UI development
-const userData = {
-  name: 'Priya Sharma',
-  ecoPoints: 1250,
-  rank: 12,
-  pickupsCompleted: 15,
-};
-
-const recentBookings = [
-  { id: 1, date: '2025-07-22', type: 'E-Waste', status: 'Completed', points: 150 },
-  { id: 2, date: '2025-07-18', type: 'Plastics', status: 'Completed', points: 75 },
-  { id: 3, date: '2025-07-15', type: 'Paper', status: 'Completed', points: 50 },
-];
-
-const leaderboard = [
-  { rank: 1, name: 'Rohan Verma', points: 2500 },
-  { rank: 2, name: 'Aarav Singh', points: 2310 },
-  { rank: 3, name: 'Saanvi Gupta', points: 2150 },
-];
-
+// We can keep the StatCard component as it is
 const StatCard = ({ icon, title, value, color }) => (
   <div className={`p-6 rounded-xl shadow-md flex items-center space-x-4 ${color}`}>
     <div className="text-3xl">{icon}</div>
@@ -33,6 +15,44 @@ const StatCard = ({ icon, title, value, color }) => (
 );
 
 const DashboardPage = () => {
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Mock data for UI elements that aren't dynamic yet
+  const recentBookings = [
+    { id: 1, date: '2025-07-22', type: 'E-Waste', status: 'Completed', points: 150 },
+    { id: 2, date: '2025-07-18', type: 'Plastics', status: 'Completed', points: 75 },
+  ];
+  const leaderboard = [
+    { rank: 1, name: 'Rohan Verma', points: 2500 },
+    { rank: 2, name: 'Aarav Singh', points: 2310 },
+  ];
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await api.get('/users/me');
+        setUserData(response.data);
+      } catch (err) {
+        setError('Could not fetch user data. Please try again later.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []); // The empty array ensures this runs only once when the component mounts
+
+  if (loading) {
+    return <div className="text-center p-10">Loading your dashboard...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center p-10 text-red-500">{error}</div>;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -45,11 +65,11 @@ const DashboardPage = () => {
         <p className="text-lg text-gray-500">Here's your eco-progress report.</p>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - Using mock data for now */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <StatCard icon={<FaLeaf className="text-green-500"/>} title="Total Eco-Points" value={userData.ecoPoints} color="bg-green-100" />
-        <StatCard icon={<FaCheckCircle className="text-blue-500"/>} title="Pickups Completed" value={userData.pickupsCompleted} color="bg-blue-100" />
-        <StatCard icon={<FaTrophy className="text-yellow-500"/>} title="Your Rank" value={`#${userData.rank}`} color="bg-yellow-100" />
+        <StatCard icon={<FaLeaf className="text-green-500"/>} title="Total Eco-Points" value="1250" color="bg-green-100" />
+        <StatCard icon={<FaCheckCircle className="text-blue-500"/>} title="Pickups Completed" value="15" color="bg-blue-100" />
+        <StatCard icon={<FaTrophy className="text-yellow-500"/>} title="Your Rank" value="#12" color="bg-yellow-100" />
       </div>
 
       {/* Recent Activity & Leaderboard */}
