@@ -28,7 +28,7 @@ const userIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
-const MapComponent = ({ userPosition }) => {
+const MapComponent = ({ userPosition, recyclers }) => {
   // Default center (Kolkata)
   const defaultPosition = [22.5726, 88.3639];
 
@@ -39,12 +39,15 @@ const MapComponent = ({ userPosition }) => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       
-      {/* Marker for a sample service */}
-      <Marker position={[22.5958, 88.2636]}>
-        <Popup>
-          Sample Recycler Inc. <br /> We accept plastics and paper.
-        </Popup>
-      </Marker>
+      {/* Render a marker for each recycler */}
+      {recyclers && recyclers.map(recycler => (
+        <Marker key={recycler.id} position={[recycler.latitude, recycler.longitude]}>
+          <Popup>
+            <div className="font-bold text-lg">{recycler.name}</div>
+            <p>Accepts: {recycler.wasteTypes.join(', ')}</p>
+          </Popup>
+        </Marker>
+      ))}
 
       {/* Conditionally render marker for user's location */}
       {userPosition && (
