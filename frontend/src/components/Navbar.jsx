@@ -7,21 +7,28 @@ import authService from '../services/authService';
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
 
   // Check login status whenever the component mounts or URL changes
   useEffect(() => {
     const token = localStorage.getItem('user_token');
+    const role = localStorage.getItem('user_role');
     if (token) {
       setIsLoggedIn(true);
+      if (role === 'ROLE_ADMIN') {
+        setIsAdmin(true);
+      }
     } else {
       setIsLoggedIn(false);
+      setIsAdmin(false);
     }
   }, [navigate]); // Rerun effect if navigation occurs
 
   const handleLogout = () => {
     authService.logout();
     setIsLoggedIn(false);
+    setIsAdmin(false);
     navigate('/login');
   };
 
@@ -45,6 +52,7 @@ const Navbar = () => {
           
           {isLoggedIn ? (
             <>
+              {isAdmin && <Link to="/admin/dashboard" className="text-blue-600 font-bold hover:text-blue-800">Admin</Link>}
               <Link to="/dashboard" className="text-gray-600 hover:text-green-600 transition-colors">Dashboard</Link>
               <button onClick={handleLogout} className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
                 Logout
@@ -83,6 +91,7 @@ const Navbar = () => {
             
             {isLoggedIn ? (
               <>
+                {isAdmin && <Link to="/admin/dashboard" className="text-blue-600 font-bold hover:text-blue-800">Admin</Link>}
                 <Link to="/dashboard" className="block py-2 px-6 text-gray-600 hover:bg-gray-100" onClick={() => setIsOpen(false)}>Dashboard</Link>
                 <button onClick={() => { handleLogout(); setIsOpen(false); }} className="w-full text-left block py-2 px-6 text-red-600 hover:bg-gray-100">Logout</button>
               </>

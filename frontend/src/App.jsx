@@ -10,9 +10,11 @@ import SignupPage from './pages/SignupPage';
 import FindServicesPage from './pages/FindServicesPage';
 import LearnPage from './pages/LearnPage';
 import DashboardPage from './pages/DashboardPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 
 // Import the ProtectedRoute component
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
 
 function App() {
   return (
@@ -27,10 +29,14 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
 
-          {/* Protected Routes */}
+          {/* Protected User Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             {/* You can add more protected routes here later */}
+          </Route>
+          {/* Protected Admin Routes */}
+          <Route element={<AdminRoute />}>
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           </Route>
         </Routes>
       </main>
