@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaLeaf, FaTrophy, FaCheckCircle, FaStar } from 'react-icons/fa';
-import api from '../services/api'; // 👈 Import our new authenticated api service
+import api from '../services/api';
 
-// We can keep the StatCard component as it is
 const StatCard = ({ icon, title, value, color }) => (
   <div className={`p-6 rounded-xl shadow-md flex items-center space-x-4 ${color}`}>
     <div className="text-3xl">{icon}</div>
@@ -41,9 +40,8 @@ const DashboardPage = () => {
         setLoading(false);
       }
     };
-
     fetchUserData();
-  }, []); // The empty array ensures this runs only once when the component mounts
+  }, []);
 
   if (loading) {
     return <div className="text-center p-10">Loading your dashboard...</div>;
@@ -59,22 +57,26 @@ const DashboardPage = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-800">Welcome back, {userData.name}!</h1>
         <p className="text-lg text-gray-500">Here's your eco-progress report.</p>
       </div>
 
-      {/* Stats Grid - Using mock data for now */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <StatCard icon={<FaLeaf className="text-green-500"/>} title="Total Eco-Points" value="1250" color="bg-green-100" />
+        <StatCard 
+          icon={<FaLeaf className="text-green-500"/>} 
+          title="Total Eco-Points" 
+          value={userData.ecoPoints} 
+          color="bg-green-100" 
+        />
+        {/* The rest are still using mock data for now */}
         <StatCard icon={<FaCheckCircle className="text-blue-500"/>} title="Pickups Completed" value="15" color="bg-blue-100" />
         <StatCard icon={<FaTrophy className="text-yellow-500"/>} title="Your Rank" value="#12" color="bg-yellow-100" />
       </div>
 
       {/* Recent Activity & Leaderboard */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Recent Bookings Section */}
         <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Recent Activity</h2>
           <ul className="space-y-4">
@@ -92,8 +94,6 @@ const DashboardPage = () => {
             ))}
           </ul>
         </div>
-
-        {/* Leaderboard Section */}
         <div className="bg-white p-6 rounded-xl shadow-md">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Leaderboard</h2>
             <ul className="space-y-4">

@@ -30,6 +30,8 @@ public class BookingService {
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found for email: " + currentUserEmail));
 
+        int points = calculatePoints(bookingRequest.getWasteType());
+
         // 3. Create a new Booking entity
         Booking newBooking = Booking.builder()
                 .user(currentUser) // Link the booking to the current user
@@ -37,7 +39,11 @@ public class BookingService {
                 .notes(bookingRequest.getNotes())
                 .status(BookingStatus.PENDING) // Default status is PENDING
                 .bookingDate(LocalDateTime.now())
+                .pointsAwarded(points)
                 .build();
+
+        currentUser.setEcoPoints(currentUser.getEcoPoints() + points);
+        userRepository.save(currentUser);
 
         // 4. Save the booking to the database
         Booking savedBooking = bookingRepository.save(newBooking);
@@ -50,5 +56,16 @@ public class BookingService {
                 .bookingDate(savedBooking.getBookingDate())
                 .userName(savedBooking.getUser().getName())
                 .build();
+    }
+
+    // Simple point calculation logic
+    private int calculatePoints(String wasteType) {
+        return switch (wasteType.toLowerCase()) {
+            case "e-waste", "batteries" -> 100;
+            case "plastic", "plastics" -> 50;
+            case "paper", "cardboard" -> 25;
+            case "clothes", "textiles" -> 40;
+            default -> 10;
+        };
     }
 }

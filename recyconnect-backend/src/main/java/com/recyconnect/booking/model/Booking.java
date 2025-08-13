@@ -37,4 +37,7 @@ public class Booking {
     private LocalDateTime bookingDate;
 
     private String notes;
+
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private Integer pointsAwarded = 0;
 }

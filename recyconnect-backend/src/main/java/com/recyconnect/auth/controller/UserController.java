@@ -34,6 +34,7 @@ public class UserController {
                 .name(user.getName())
                 .email(user.getEmail())
                 .role(user.getRole().name())
+                .ecoPoints(user.getEcoPoints())
                 .build();
 
         return ResponseEntity.ok(userDto);
