@@ -28,6 +28,7 @@ public class NgoService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.ROLE_NGO) // Assign the NGO role
+                .ecoPoints(0)
                 .build();
         User savedUser = userRepository.save(newUser);
 

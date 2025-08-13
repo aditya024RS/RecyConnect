@@ -9,5 +9,4 @@ public class RecyconnectBackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(RecyconnectBackendApplication.class, args);
 	}
-
 }

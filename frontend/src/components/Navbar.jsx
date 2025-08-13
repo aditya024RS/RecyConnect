@@ -52,8 +52,8 @@ const Navbar = () => {
           
           {isLoggedIn ? (
             <>
-              {isAdmin && <Link to="/admin/dashboard" className="text-blue-600 font-bold hover:text-blue-800">Admin</Link>}
               <Link to="/dashboard" className="text-gray-600 hover:text-green-600 transition-colors">Dashboard</Link>
+              {isAdmin && <Link to="/admin/dashboard" className="text-blue-600 font-bold hover:text-blue-800">Admin</Link>}
               <button onClick={handleLogout} className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
                 Logout
               </button>
@@ -91,8 +91,8 @@ const Navbar = () => {
             
             {isLoggedIn ? (
               <>
-                {isAdmin && <Link to="/admin/dashboard" className="text-blue-600 font-bold hover:text-blue-800">Admin</Link>}
                 <Link to="/dashboard" className="block py-2 px-6 text-gray-600 hover:bg-gray-100" onClick={() => setIsOpen(false)}>Dashboard</Link>
+                {isAdmin && <Link to="/admin/dashboard" className="block py-2 px-6 text-blue-600 font-bold hover:text-blue-800">Admin</Link>}
                 <button onClick={() => { handleLogout(); setIsOpen(false); }} className="w-full text-left block py-2 px-6 text-red-600 hover:bg-gray-100">Logout</button>
               </>
             ) : (

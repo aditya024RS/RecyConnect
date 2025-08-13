@@ -27,6 +27,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.ROLE_USER) // Default role
+                .ecoPoints(0)
                 .build();
         userRepository.save(user);
         var jwtToken = jwtService.generateToken(user);
