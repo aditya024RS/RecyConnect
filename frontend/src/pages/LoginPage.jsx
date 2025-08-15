@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FcGoogle } from "react-icons/fc";
 import { FiMail, FiLock } from "react-icons/fi";
+import { toast } from 'react-toastify';
 
 import Input from "../components/Input";
 import SocialButton from "../components/SocialButton";
@@ -34,12 +35,13 @@ const LoginPage = () => {
         // Store the token and role in localStorage
         localStorage.setItem("user_token", response.data.token);
         localStorage.setItem("user_role", response.data.role);
-
+        toast.success('Login Successful!');
         // Redirect to the dashboard
         navigate("/dashboard");
       }
     } catch (err) {
       setError("Invalid email or password. Please try again.");
+      toast.error('Invalid email or password. Please try again.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -48,7 +50,7 @@ const LoginPage = () => {
 
   const handleGoogleLogin = () => {
     console.log("Logging in with Google");
-    alert("Google Login clicked! (Frontend only)");
+    toast.info('Google Login is not yet implemented.');
   };
 
   return (

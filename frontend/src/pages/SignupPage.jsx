@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FcGoogle } from 'react-icons/fc';
 import { FiUser, FiMail, FiLock } from 'react-icons/fi';
+import { toast } from 'react-toastify';
 
 import Input from '../components/Input';
 import SocialButton from '../components/SocialButton';
@@ -38,13 +39,14 @@ const SignupPage = () => {
         // Automatically log the user in upon successful signup
         localStorage.setItem('user_token', response.data.token);
         localStorage.setItem('user_role', response.data.role);
-
+        toast.success('Signup Successful!');
         // Redirect to the dashboard
         navigate('/dashboard');
       }
     } catch (err) {
       // Assuming the backend sends an error if the email is already in use
       setError('An account with this email already exists.');
+      toast.error('An account with this email already exists.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -54,7 +56,7 @@ const SignupPage = () => {
   const handleGoogleSignup = () => {
     // This would trigger the Google OAuth flow
     console.log('Signing up with Google');
-    alert('Google Signup clicked! (Frontend only)');
+    toast.info('Google Signup is not yet implemented.');
   };
 
   return (

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMenu, FiX } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import authService from '../services/authService';
 
 const Navbar = () => {
@@ -29,6 +30,7 @@ const Navbar = () => {
     authService.logout();
     setIsLoggedIn(false);
     setIsAdmin(false);
+    toast.success('Logout Successful!');
     navigate('/login');
   };
 

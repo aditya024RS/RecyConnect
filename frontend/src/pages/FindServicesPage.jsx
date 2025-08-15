@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import MapComponent from '../components/MapComponent';
 import Modal from '../components/Modal';
 import { FaMapMarkerAlt } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 import api from '../services/api';
 
 const FindServicesPage = () => {
@@ -22,7 +23,7 @@ const FindServicesPage = () => {
         setRecyclers(response.data);
       } catch (error) {
         console.error("Failed to fetch recycler locations:", error);
-        alert("Could not load recycler locations.");
+        toast.error("Could not load recycler locations.");
       } finally {
         setLoading(false);
       }
@@ -40,7 +41,7 @@ const FindServicesPage = () => {
       },
       (error) => {
         console.error("Error getting user location:", error);
-        alert("Could not get your location. Please ensure you have granted permission.");
+        toast.info("Could not get your location. Please ensure you have granted permission.");
       }
     );
   };
