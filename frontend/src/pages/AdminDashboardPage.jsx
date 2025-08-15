@@ -63,13 +63,13 @@ const AdminDashboardPage = () => {
               </thead>
               <tbody>
                 {pendingNgos.map((ngo) => (
-                  <tr key={ngo.id} className="border-b">
-                    <td className="py-3 px-4">{ngo.user.name}</td>
+                  <tr key={ngo.ngoId} className="border-b">
+                    <td className="py-3 px-4">{ngo.ngoName}</td>
                     <td className="py-3 px-4">{ngo.contactNumber}</td>
                     <td className="py-3 px-4">{ngo.address}</td>
                     <td className="py-3 px-4 text-center">
                       <button
-                        onClick={() => handleApprove(ngo.id)}
+                        onClick={() => handleApprove(ngo.ngoId)}
                         className="bg-green-500 text-white py-1 px-3 rounded hover:bg-green-600 transition-colors"
                       >
                         Approve

@@ -1,5 +1,6 @@
 package com.recyconnect.admin.controller;
 
+import com.recyconnect.ngo.dto.PendingNgoDto;
 import com.recyconnect.ngo.model.Ngo;
 import com.recyconnect.ngo.service.NgoAdminService;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,8 @@ public class AdminController {
     private final NgoAdminService ngoAdminService;
 
     @GetMapping("/ngos/pending")
-    public ResponseEntity<List<Ngo>> getPendingNgos() {
-        List<Ngo> pendingNgos = ngoAdminService.getPendingNgos();
+    public ResponseEntity<List<PendingNgoDto>> getPendingNgos() {
+        List<PendingNgoDto> pendingNgos = ngoAdminService.getPendingNgos();
         return ResponseEntity.ok(pendingNgos);
     }
 
