@@ -56,8 +56,11 @@ const FindServicesPage = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     try {
-      // In a real app, you might pass selectedRecycler.id to the backend
-      const response = await api.post('/bookings', bookingDetails);
+      const payload = {
+        ...bookingDetails,
+        ngoId: selectedRecycler.id
+      };
+      const response = await api.post('/bookings', payload);
       setBookingStatus({ message: `Success! Booking ID: ${response.data.id}`, error: false });
       // Close modal after a short delay
       setTimeout(() => {

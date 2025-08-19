@@ -3,6 +3,7 @@ package com.recyconnect.ngo.service;
 import com.recyconnect.ngo.dto.PendingNgoDto;
 import com.recyconnect.ngo.model.Ngo;
 import com.recyconnect.ngo.model.NgoStatus;
+import com.recyconnect.ngo.dto.NgoResponseDto;
 import com.recyconnect.ngo.repository.NgoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -29,15 +30,14 @@ public class NgoAdminService {
     }
 
     @Transactional
-    public Ngo approveNgo(Long ngoId) {
-        Optional<Ngo> optionalNgo = ngoRepository.findById(ngoId);
+    public NgoResponseDto approveNgo(Long ngoId) {
+        Ngo ngo = ngoRepository.findById(ngoId)
+                .orElseThrow(() -> new EntityNotFoundException("NGO with ID " + ngoId + " not found."));
 
-        if (optionalNgo.isPresent()) {
-            Ngo ngo = optionalNgo.get();
-            ngo.setStatus(NgoStatus.ACTIVE);
-            return ngoRepository.save(ngo);
-        } else {
-            throw new EntityNotFoundException("NGO with ID " + ngoId + " not found.");
-        }
+        ngo.setStatus(NgoStatus.ACTIVE);
+        Ngo savedNgo = ngoRepository.save(ngo);
+
+        return NgoResponseDto.fromEntity(savedNgo);
     }
+
 }

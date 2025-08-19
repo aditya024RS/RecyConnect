@@ -5,10 +5,10 @@ import com.recyconnect.booking.dto.BookingResponseDto;
 import com.recyconnect.booking.service.BookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -21,5 +21,11 @@ public class BookingController {
     public ResponseEntity<BookingResponseDto> createBooking(@RequestBody BookingRequestDto bookingRequest) {
         BookingResponseDto newBooking = bookingService.createBooking(bookingRequest);
         return ResponseEntity.ok(newBooking);
+    }
+
+    @GetMapping("/my-bookings")
+    @PreAuthorize("hasRole('USER')") // Only regular users can access this
+    public ResponseEntity<List<BookingResponseDto>> getMyBookings() {
+        return ResponseEntity.ok(bookingService.getBookingsForCurrentUser());
     }
 }

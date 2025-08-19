@@ -3,6 +3,7 @@ package com.recyconnect.admin.controller;
 import com.recyconnect.ngo.dto.PendingNgoDto;
 import com.recyconnect.ngo.model.Ngo;
 import com.recyconnect.ngo.service.NgoAdminService;
+import com.recyconnect.ngo.dto.NgoResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,8 +26,8 @@ public class AdminController {
     }
 
     @PostMapping("/ngos/{ngoId}/approve")
-    public ResponseEntity<Ngo> approveNgo(@PathVariable Long ngoId) {
-        Ngo approvedNgo = ngoAdminService.approveNgo(ngoId);
+    public ResponseEntity<NgoResponseDto> approveNgo(@PathVariable Long ngoId) {
+        NgoResponseDto approvedNgo = ngoAdminService.approveNgo(ngoId);
         return ResponseEntity.ok(approvedNgo);
     }
 }

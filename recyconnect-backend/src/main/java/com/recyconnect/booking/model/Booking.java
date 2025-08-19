@@ -1,6 +1,7 @@
 package com.recyconnect.booking.model;
 
 import com.recyconnect.auth.model.User;
+import com.recyconnect.ngo.model.Ngo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,6 +36,10 @@ public class Booking {
 
     @Column(nullable = false)
     private LocalDateTime bookingDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ngo_id", nullable = false)
+    private Ngo ngo;
 
     private String notes;
 
