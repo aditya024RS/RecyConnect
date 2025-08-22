@@ -20,6 +20,8 @@ import AdminRoute from './components/AdminRoute';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import OAuth2RedirectHandler from './pages/OAuth2RedirectHandler';
+
 function App() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -44,11 +46,11 @@ function App() {
           <Route path="/learn" element={<LearnPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/login/oauth2/success" element={<OAuth2RedirectHandler />} />
 
           {/* Protected User & NGO Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
-            {/* You can add more protected routes here later */}
           </Route>
           {/* Protected Admin Routes */}
           <Route element={<AdminRoute />}>

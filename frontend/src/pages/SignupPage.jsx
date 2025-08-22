@@ -6,7 +6,6 @@ import { FiUser, FiMail, FiLock } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
 import Input from '../components/Input';
-import SocialButton from '../components/SocialButton';
 import authService from '../services/authService';
 
 const SignupPage = () => {
@@ -18,6 +17,8 @@ const SignupPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const BACKEND_URL = 'http://localhost:8080';
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -102,7 +103,13 @@ const SignupPage = () => {
             <div className="flex-grow border-t border-gray-300"></div>
         </div>
         <div className="space-y-4">
-            <SocialButton provider="Google" icon={FcGoogle} onClick={handleGoogleSignup} />
+            <a
+              href={`${BACKEND_URL}/oauth2/authorization/google`}
+              className="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              <FcGoogle className="w-5 h-5 mr-2" />
+              <span>Continue with Google</span>
+            </a>
         </div>
       </div>
     </motion.div>
