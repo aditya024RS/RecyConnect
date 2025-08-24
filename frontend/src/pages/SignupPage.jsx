@@ -45,19 +45,22 @@ const SignupPage = () => {
         navigate('/dashboard');
       }
     } catch (err) {
-      // Assuming the backend sends an error if the email is already in use
-      setError('An account with this email already exists.');
-      toast.error('An account with this email already exists.');
-      console.error(err);
+      if (err.response && err.response.data) {
+              const errors = err.response.data;
+              if (typeof errors === 'object') {
+                Object.keys(errors).forEach((field) => {
+                  toast.error(`${field.charAt(0).toUpperCase() + field.slice(1)}: ${errors[field]}`);
+                });
+              } else {
+                toast.error(errors.message || 'An unexpected error occurred.');
+              }
+            } else {
+              toast.error('Signup failed. Please check your connection and try again.');
+            }
+            console.error(err);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogleSignup = () => {
-    // This would trigger the Google OAuth flow
-    console.log('Signing up with Google');
-    toast.info('Google Signup is not yet implemented.');
   };
 
   return (

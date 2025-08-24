@@ -41,17 +41,23 @@ const LoginPage = () => {
         navigate("/dashboard");
       }
     } catch (err) {
-      setError("Invalid email or password. Please try again.");
-      toast.error('Invalid email or password. Please try again.');
+      if (err.response && err.response.data) {
+        const errors = err.response.data;
+        if (typeof errors === 'object') {
+          Object.keys(errors).forEach((field) => {
+            toast.error(`${field.charAt(0).toUpperCase() + field.slice(1)}: ${errors[field]}`);
+          });
+        } else {
+          toast.error(errors.message || 'An unexpected error occurred.');
+        }
+      } else {
+        setError('Invalid email or password.');
+        toast.error('Login failed. Please try again.');
+      }
       console.error(err);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogleLogin = () => {
-    console.log("Logging in with Google");
-    toast.info('Google Login is not yet implemented.');
   };
 
   return (
