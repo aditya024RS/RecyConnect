@@ -1,14 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import MapComponent from '../components/MapComponent';
 import Modal from '../components/Modal';
-import { FaMapMarkerAlt } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaSearch } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import api from '../services/api';
+import debounce from 'lodash.debounce';
+
+const WASTE_TYPES = ["Plastic", "Paper", "E-Waste", "Clothes", "Cardboard", "Batteries", "Textiles"];
 
 const FindServicesPage = () => {
   const [userPosition, setUserPosition] = useState(null);
   const [recyclers, setRecyclers] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // State for filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedWasteType, setSelectedWasteType] = useState('');
 
   // State for the modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,21 +23,42 @@ const FindServicesPage = () => {
   const [bookingDetails, setBookingDetails] = useState({ wasteType: '', notes: '' });
   const [bookingStatus, setBookingStatus] = useState({ message: '', error: false });
 
-  useEffect(() => {
-    const fetchRecyclers = async () => {
-      try {
-        const response = await api.get('/map/recyclers');
-        setRecyclers(response.data);
-      } catch (error) {
-        console.error("Failed to fetch recycler locations:", error);
-        toast.error("Could not load recycler locations.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchRecyclers = useCallback(async (query, wasteType) => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (query) params.append('q', query);
+      if (wasteType) params.append('wasteType', wasteType);
 
-    fetchRecyclers();
+      const response = await api.get(`/map/recyclers?${params.toString()}`);
+      setRecyclers(response.data);
+    } catch (error) {
+      toast.error("Could not load recycler locations.");
+      console.error("Failed to fetch recycler locations:", error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Create a debounced version of the fetch function
+  const debouncedFetch = useCallback(debounce(fetchRecyclers, 500), [fetchRecyclers]);
+
+  // useEffect for initial data load
+  useEffect(() => {
+    const token = localStorage.getItem('user_token');
+    if (token) {
+      fetchRecyclers('', ''); // Fetch all recyclers initially
+    } else {
+      setLoading(false); // If not logged in, just stop loading
+    }
+  }, [fetchRecyclers]);
+
+  // useEffect for handling filter changes
+  useEffect(() => {
+    debouncedFetch(searchQuery, selectedWasteType);
+    // Cleanup the debounce function on component unmount
+    return () => debouncedFetch.cancel();
+  }, [searchQuery, selectedWasteType, debouncedFetch]);
 
   const handleFindMe = () => {
     navigator.geolocation.getCurrentPosition(
@@ -76,7 +104,35 @@ const FindServicesPage = () => {
     <div className="animate-fade-in relative">
       <div className="text-center mb-6">
         <h1 className="text-4xl font-bold text-gray-800">Find Recycling Services</h1>
-        <p className="text-lg text-gray-600 mt-2">Explore nearby NGOs and recyclers.</p>
+        <p className="text-lg text-gray-600 mt-2">Search for a specific service or filter by waste type.</p>
+      </div>
+
+      {/* Filter and Search Controls */}
+      <div className="mb-6 p-4 bg-white rounded-lg shadow-md flex flex-col md:flex-row gap-4 items-center">
+        {/* Search Bar */}
+        <div className="relative w-full md:w-1/2">
+          <FaSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by name or address..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-green-500 focus:border-green-500"
+          />
+        </div>
+        {/* Waste Type Filter */}
+        <div className="w-full md:w-1/2">
+          <select
+            value={selectedWasteType}
+            onChange={(e) => setSelectedWasteType(e.target.value)}
+            className="w-full py-2 px-3 border rounded-lg focus:ring-green-500 focus:border-green-500"
+          >
+            <option value="">All Waste Types</option>
+            {WASTE_TYPES.map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* We pass the user's position down to the MapComponent */}
@@ -88,12 +144,13 @@ const FindServicesPage = () => {
         )}
         <button
           onClick={handleFindMe}
-          className="absolute top-4 right-4 z-[1000] bg-white text-green-600 font-bold py-2 px-4 rounded-full shadow-lg hover:bg-green-50 transition-transform transform hover:scale-105 flex items-center space-x-2"
+          className="absolute top-4 right-4 z-[800] bg-white text-green-600 font-bold py-2 px-4 rounded-full shadow-lg hover:bg-green-50 transition-transform transform hover:scale-105 flex items-center space-x-2"
         >
           <FaMapMarkerAlt />
           <span>Find Me</span>
         </button>
       </div>
+
       {/* Booking Modal */}
       <Modal 
         isOpen={isModalOpen} 
