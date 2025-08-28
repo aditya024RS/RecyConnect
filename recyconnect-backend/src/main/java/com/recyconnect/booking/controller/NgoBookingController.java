@@ -1,6 +1,7 @@
 package com.recyconnect.booking.controller;
 
 import com.recyconnect.booking.dto.BookingResponseDto;
+import com.recyconnect.booking.dto.UpdateStatusRequestDto;
 import com.recyconnect.booking.service.NgoBookingService;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,11 @@ public class NgoBookingController {
     }
 
     @PostMapping("/{bookingId}/update-status")
-    public ResponseEntity<BookingResponseDto> updateBookingStatus(@PathVariable Long bookingId, @RequestBody String status) {
-        BookingResponseDto updatedBooking = ngoBookingService.updateBookingStatus(bookingId, status);
+    public ResponseEntity<BookingResponseDto> updateBookingStatus(
+            @PathVariable Long bookingId,
+            @RequestBody UpdateStatusRequestDto request) {
+
+        BookingResponseDto updatedBooking = ngoBookingService.updateBookingStatus(bookingId, request.getStatus());
         return ResponseEntity.ok(updatedBooking);
     }
 }
