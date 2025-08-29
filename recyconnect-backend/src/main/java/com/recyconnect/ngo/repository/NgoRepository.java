@@ -22,4 +22,6 @@ public interface NgoRepository extends JpaRepository<Ngo, Long> {
     );
 
     Optional<Ngo> findByUserId(Integer userId);
+
+    long countByStatus(NgoStatus status);
 }

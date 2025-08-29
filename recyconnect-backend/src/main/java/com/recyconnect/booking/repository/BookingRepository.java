@@ -12,4 +12,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     // Finds all bookings for a specific NGO and status.
     List<Booking> findByNgoIdAndStatusOrderByBookingDateAsc(Long ngoId, BookingStatus status);
+
+    long countByStatus(BookingStatus status);
 }
