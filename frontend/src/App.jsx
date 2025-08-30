@@ -11,6 +11,8 @@ import FindServicesPage from './pages/FindServicesPage';
 import LearnPage from './pages/LearnPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 // Import the ProtectedRoute component
 import ProtectedRoute from './components/ProtectedRoute';
@@ -47,6 +49,8 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login/oauth2/success" element={<OAuth2RedirectHandler />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Protected User & NGO Routes */}
           <Route element={<ProtectedRoute />}>

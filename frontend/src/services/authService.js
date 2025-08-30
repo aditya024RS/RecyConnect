@@ -39,11 +39,25 @@ const logout = () => {
   localStorage.removeItem('user_role');
 };
 
+const forgotPassword = (email) => {
+  // We send the email as a request parameter, not in the body
+  return axios.post(`${API_URL}forgot-password?email=${email}`);
+};
+
+const resetPassword = (token, newPassword) => {
+  return axios.post(API_URL + 'reset-password', {
+    token,
+    newPassword,
+  });
+};
+
 // We can add a getCurrentUser method later
 const authService = {
   signup,
   login,
   logout,
+  forgotPassword,
+  resetPassword,
 };
 
 export default authService;

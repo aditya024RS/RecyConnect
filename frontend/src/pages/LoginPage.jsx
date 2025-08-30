@@ -105,6 +105,17 @@ const LoginPage = () => {
               onChange={handleChange}
             />
           </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+            </div>
+            <div className="text-sm">
+              <Link to="/forgot-password" className="font-medium text-green-600 hover:text-green-500">
+                Forgot your password?
+              </Link>
+            </div>
+          </div>
+
           <div>
             <button
               type="submit"
