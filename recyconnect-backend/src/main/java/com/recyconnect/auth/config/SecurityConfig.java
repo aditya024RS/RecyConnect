@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/oauth2/**", "/api/stats").permitAll()
+                        .requestMatchers("/api/ngo/**", "/api/users/**", "/api/bookings/**").authenticated()
                         .anyRequest().authenticated() // All other requests must be authenticated
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

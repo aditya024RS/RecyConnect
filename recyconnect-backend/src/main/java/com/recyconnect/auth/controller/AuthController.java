@@ -35,12 +35,6 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 
-    @PostMapping("/register-ngo")
-    public ResponseEntity<String> registerNgo(@Valid @RequestBody NgoRegistrationRequestDto request) {
-        ngoService.registerNgo(request);
-        return ResponseEntity.ok("NGO registration successful! Your application is pending approval.");
-    }
-
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestParam String email) {
         try {
