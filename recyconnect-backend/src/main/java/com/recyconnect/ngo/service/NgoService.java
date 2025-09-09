@@ -24,6 +24,7 @@ public class NgoService {
 
         // Create the associated Ngo entity and link it to the current user
         Ngo newNgo = Ngo.builder()
+                .name(request.getName())
                 .user(currentUser)
                 .address(request.getAddress())
                 .contactNumber(request.getContactNumber())

@@ -36,7 +36,7 @@ public class MapService {
     private RecyclerDto mapToRecyclerDto(Ngo ngo) {
         return RecyclerDto.builder()
                 .id(ngo.getId())
-                .name(ngo.getUser().getName())
+                .name(ngo.getName())
                 .latitude(ngo.getLatitude())
                 .longitude(ngo.getLongitude())
                 .wasteTypes(ngo.getAcceptedWasteTypes())

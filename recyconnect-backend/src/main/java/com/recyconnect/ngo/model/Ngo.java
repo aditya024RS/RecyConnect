@@ -21,6 +21,9 @@ public class Ngo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String name;
+
     // An NGO is fundamentally a User, so we link them directly.
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

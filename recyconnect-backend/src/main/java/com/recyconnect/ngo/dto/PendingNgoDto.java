@@ -16,7 +16,7 @@ public class PendingNgoDto {
     public static PendingNgoDto fromEntity(Ngo ngo) {
         return PendingNgoDto.builder()
                 .ngoId(ngo.getId())
-                .ngoName(ngo.getUser().getName()) // Safely get the name from the nested user
+                .ngoName(ngo.getName()) // Safely get the name from the nested user
                 .contactNumber(ngo.getContactNumber())
                 .address(ngo.getAddress())
                 .build();

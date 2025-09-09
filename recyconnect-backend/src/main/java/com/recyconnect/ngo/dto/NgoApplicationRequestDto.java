@@ -8,6 +8,9 @@ import java.util.List;
 
 @Data
 public class NgoApplicationRequestDto {
+    @NotBlank(message = "Official Name cannot be empty")
+    private String name;
+
     @NotBlank(message = "Address cannot be empty")
     private String address;
 

@@ -15,7 +15,7 @@ public class NgoResponseDto {
     public static NgoResponseDto fromEntity(Ngo ngo) {
         return NgoResponseDto.builder()
                 .id(ngo.getId())
-                .name(ngo.getUser().getName())
+                .name(ngo.getName())
                 .address(ngo.getAddress())
                 .status(ngo.getStatus().name())
                 .build();
