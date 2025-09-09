@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaLeaf, FaTrophy, FaCheckCircle, FaStar } from 'react-icons/fa';
 import api from '../services/api';
@@ -60,6 +61,19 @@ const UserDashboardPage = () => {
         <StatCard icon={<FaCheckCircle className="text-blue-500"/>} title="Pickups Completed" value={bookings.filter(b => b.status === 'COMPLETED').length} color="bg-blue-100" />
         <StatCard icon={<FaTrophy className="text-yellow-500"/>} title="Your Rank" value="#12" color="bg-yellow-100" />
       </div>
+
+      {/* 👇 NEW SECTION 👇 */}
+      {/* We will add logic later to hide this if the user is already an NGO */}
+      <section className="my-8 p-6 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+          <h2 className="text-2xl font-bold text-gray-800">Join Our Network!</h2>
+          <p className="text-gray-600 mt-2">Are you a recycler or an NGO? Join our platform to connect with the community and help us build a greener future.</p>
+          <Link 
+              to="/apply-ngo"
+              className="mt-4 inline-block bg-blue-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-600 transition-colors"
+          >
+              Become a Service Provider
+          </Link>
+      </section>
 
       {/* My Bookings Section */}
       <div className="bg-white p-6 rounded-xl shadow-md">

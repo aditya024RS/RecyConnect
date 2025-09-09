@@ -13,6 +13,7 @@ import DashboardPage from './pages/DashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import NgoApplicationPage from './pages/NgoApplicationPage';
 
 // Import the ProtectedRoute component
 import ProtectedRoute from './components/ProtectedRoute';
@@ -42,6 +43,7 @@ function App() {
       />
       <main className="flex-grow container mx-auto p-6">
         <Routes>
+
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/services" element={<FindServicesPage />} />
@@ -55,11 +57,14 @@ function App() {
           {/* Protected User & NGO Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
-          </Route>
+            <Route path="/apply-ngo" element={<NgoApplicationPage />} />
+          </Route>          
+
           {/* Protected Admin Routes */}
           <Route element={<AdminRoute />}>
             <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           </Route>
+
         </Routes>
       </main>
       <Footer />
