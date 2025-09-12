@@ -2,6 +2,7 @@ package com.recyconnect.ngo.repository;
 
 import com.recyconnect.ngo.model.Ngo;
 import com.recyconnect.ngo.model.NgoStatus;
+import com.recyconnect.auth.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,4 +25,6 @@ public interface NgoRepository extends JpaRepository<Ngo, Long> {
     Optional<Ngo> findByUserId(Integer userId);
 
     long countByStatus(NgoStatus status);
+
+    Optional<Ngo> findByUser(User user);
 }

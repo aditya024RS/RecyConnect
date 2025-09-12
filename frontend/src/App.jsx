@@ -14,6 +14,7 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import NgoApplicationPage from './pages/NgoApplicationPage';
+import EditNgoProfilePage from './pages/EditNgoProfilePage';
 
 // Import the ProtectedRoute component
 import ProtectedRoute from './components/ProtectedRoute';
@@ -58,6 +59,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/apply-ngo" element={<NgoApplicationPage />} />
+            <Route path="/edit-ngo-profile" element={<EditNgoProfilePage />} />
           </Route>          
 
           {/* Protected Admin Routes */}

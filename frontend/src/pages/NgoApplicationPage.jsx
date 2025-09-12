@@ -5,7 +5,13 @@ import { toast } from 'react-toastify';
 import api from '../services/api';
 import LocationPicker from '../components/LocationPicker';
 import Modal from '../components/Modal';
-import { FaMapMarkerAlt } from 'react-icons/fa';
+import {
+  FaSave,
+  FaBuilding,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaRecycle,
+} from "react-icons/fa";
 
 const WASTE_TYPES = ["Plastic", "Paper", "E-Waste", "Clothes", "Cardboard", "Batteries", "Textiles", "Metal"];
 
@@ -81,7 +87,7 @@ const NgoApplicationPage = () => {
         className="max-w-2xl mx-auto py-12 px-4"
       >
         <div className="p-8 bg-white rounded-xl shadow-lg">
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-3xl sm:text-4xl font-extrabold text-gray-900">
             Service Provider Application
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
@@ -92,9 +98,10 @@ const NgoApplicationPage = () => {
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
+                className="flex items-center text-sm font-medium text-gray-700 mb-1"
               >
-                Official NGO / Business Name
+                <FaBuilding className="mr-2 text-green-600" /> Official NGO /
+                Business Name
               </label>
               <input
                 id="name"
@@ -112,9 +119,9 @@ const NgoApplicationPage = () => {
             <div>
               <label
                 htmlFor="address"
-                className="block text-sm font-medium text-gray-700"
+                className="flex items-center text-sm font-medium text-gray-700 mb-1"
               >
-                Full Address
+                <FaMapMarkerAlt className="mr-2 text-green-600" /> Full Address
               </label>
               <textarea
                 id="address"
@@ -131,9 +138,9 @@ const NgoApplicationPage = () => {
             <div>
               <label
                 htmlFor="contactNumber"
-                className="block text-sm font-medium text-gray-700"
+                className="flex items-center text-sm font-medium text-gray-700 mb-1"
               >
-                Contact Number
+                <FaPhone className="mr-2 text-green-600" /> Contact Number
               </label>
               <input
                 id="contactNumber"
@@ -148,8 +155,9 @@ const NgoApplicationPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Accepted Waste Types
+              <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                <FaRecycle className="mr-2 text-green-600" /> Accepted Waste
+                Types
               </label>
               <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-4">
                 {WASTE_TYPES.map((type) => (
@@ -202,7 +210,7 @@ const NgoApplicationPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-green-300"
+              className="w-full flex justify-center py-2 px-4 border font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-green-300"
             >
               {loading ? "Submitting Application..." : "Submit for Approval"}
             </button>

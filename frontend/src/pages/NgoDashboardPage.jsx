@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { toast } from 'react-toastify';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const NgoDashboardPage = () => {
   const [requests, setRequests] = useState([]);
@@ -33,24 +35,53 @@ const NgoDashboardPage = () => {
     }
   };
 
-  if (loading) return <p>Loading requests...</p>;
+  if (loading) {
+    return (<div className="flex justify-center items-center h-screen"> <LoadingSpinner /> </div>);
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <h1 className="text-4xl font-bold text-gray-800 mb-8">Booking Requests</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl sm:text-4xl font-bold text-gray-800">
+          Booking Requests
+        </h1>
+        <Link
+          to="/edit-ngo-profile"
+          className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          Edit Profile
+        </Link>
+      </div>
       <div className="bg-white p-6 rounded-xl shadow-md">
         {requests.length > 0 ? (
           <ul className="space-y-4">
-            {requests.map(req => (
-              <li key={req.id} className="p-4 bg-gray-50 rounded-lg flex justify-between items-center">
+            {requests.map((req) => (
+              <li
+                key={req.id}
+                className="p-4 bg-gray-50 rounded-lg flex justify-between items-center"
+              >
                 <div>
                   <p className="font-bold">{req.wasteType} Pickup</p>
-                  <p className="text-sm text-gray-600">Requested by: {req.userName}</p>
-                  <p className="text-xs text-gray-400">Date: {new Date(req.bookingDate).toLocaleString()}</p>
+                  <p className="text-sm text-gray-600">
+                    Requested by: {req.userName}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Date: {new Date(req.bookingDate).toLocaleString()}
+                  </p>
                 </div>
                 <div className="flex space-x-2">
-                  <button onClick={() => handleUpdateStatus(req.id, 'ACCEPTED')} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Accept</button>
-                  <button onClick={() => handleUpdateStatus(req.id, 'COMPLETED')} className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Complete</button>
+                  <button
+                    onClick={() => handleUpdateStatus(req.id, "ACCEPTED")}
+                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={() => handleUpdateStatus(req.id, "COMPLETED")}
+                    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                  >
+                    Complete
+                  </button>
                 </div>
               </li>
             ))}
