@@ -1,7 +1,7 @@
 package com.recyconnect.ngo.service;
 
 import com.recyconnect.auth.model.User;
-import com.recyconnect.ngo.dto.NgoApplicationRequestDto; // We will create this DTO
+import com.recyconnect.ngo.dto.NgoApplicationRequestDto;
 import com.recyconnect.ngo.model.Ngo;
 import com.recyconnect.ngo.model.NgoStatus;
 import com.recyconnect.ngo.repository.NgoRepository;
@@ -17,10 +17,6 @@ public class NgoService {
 
     @Transactional
     public void applyForNgoStatus(NgoApplicationRequestDto request, User currentUser) {
-        // TODO: Integrate Geocoding API here to get lat/lng from address
-        // For now, we'll use placeholder coordinates from your area.
-        double latitude = 22.2510; // Haldia
-        double longitude = 88.0844;
 
         // Create the associated Ngo entity and link it to the current user
         Ngo newNgo = Ngo.builder()
@@ -28,8 +24,8 @@ public class NgoService {
                 .user(currentUser)
                 .address(request.getAddress())
                 .contactNumber(request.getContactNumber())
-                .latitude(latitude)
-                .longitude(longitude)
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
                 .status(NgoStatus.PENDING_APPROVAL) // Default status
                 .acceptedWasteTypes(request.getAcceptedWasteTypes())
                 .build();
