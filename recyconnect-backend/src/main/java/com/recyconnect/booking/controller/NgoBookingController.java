@@ -7,6 +7,8 @@ import lombok.Data;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import com.recyconnect.booking.dto.OtpVerificationRequestDto;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -20,16 +22,21 @@ public class NgoBookingController {
 
     @GetMapping("/requests")
     public ResponseEntity<List<BookingResponseDto>> getBookingRequests() {
-        List<BookingResponseDto> requests = ngoBookingService.getPendingBookingsForCurrentNgo();
+        List<BookingResponseDto> requests = ngoBookingService.getActiveBookingsForCurrentNgo(); // 👈 Call the renamed method
         return ResponseEntity.ok(requests);
     }
 
-    @PostMapping("/{bookingId}/update-status")
-    public ResponseEntity<BookingResponseDto> updateBookingStatus(
-            @PathVariable Long bookingId,
-            @RequestBody UpdateStatusRequestDto request) {
-
-        BookingResponseDto updatedBooking = ngoBookingService.updateBookingStatus(bookingId, request.getStatus());
+    @PostMapping("/{bookingId}/accept")
+    public ResponseEntity<BookingResponseDto> acceptBooking(@PathVariable Long bookingId) {
+        BookingResponseDto updatedBooking = ngoBookingService.acceptBooking(bookingId);
         return ResponseEntity.ok(updatedBooking);
+    }
+
+    @PostMapping("/{bookingId}/complete")
+    public ResponseEntity<BookingResponseDto> completeBooking(
+            @PathVariable Long bookingId,
+            @Valid @RequestBody OtpVerificationRequestDto request) {
+        BookingResponseDto completedBooking = ngoBookingService.completeBookingWithOtp(bookingId, request);
+        return ResponseEntity.ok(completedBooking);
     }
 }

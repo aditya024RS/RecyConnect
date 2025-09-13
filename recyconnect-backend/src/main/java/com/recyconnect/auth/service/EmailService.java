@@ -27,4 +27,20 @@ public class EmailService {
 
         mailSender.send(message);
     }
+
+    public void sendBookingAcceptedOtpEmail(String to, String ngoName, String otp) {
+        String subject = "Your RecyConnect Pickup has been Accepted!";
+        String body = "Great news! Your pickup request with '" + ngoName + "' has been accepted.\n\n"
+                + "Your One-Time Password (OTP) for completing the pickup is: " + otp + "\n\n"
+                + "IMPORTANT: Please share this OTP with the pickup agent only after they have collected your waste. This confirms that the service is complete.\n\n"
+                + "Thank you for using RecyConnect!";
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        message.setFrom("noreply@recyconnect.com");
+
+        mailSender.send(message);
+    }
 }

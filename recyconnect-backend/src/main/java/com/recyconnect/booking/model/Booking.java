@@ -45,4 +45,10 @@ public class Booking {
 
     @Column(nullable = false, columnDefinition = "integer default 0")
     private Integer pointsAwarded = 0;
+
+    @Column(nullable = true) // OTP is null until booking is accepted
+    private String otp;
+
+    @Column(nullable = true)
+    private LocalDateTime otpExpiryDate;
 }
