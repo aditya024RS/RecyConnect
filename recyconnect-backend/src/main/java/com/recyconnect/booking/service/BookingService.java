@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
-    private final UserRepository userRepository; // To fetch the user
+    private final UserRepository userRepository;
     private final NgoRepository ngoRepository;
 
     @Transactional(readOnly = true)
@@ -64,8 +64,6 @@ public class BookingService {
         Ngo targetNgo = ngoRepository.findById(bookingRequest.getNgoId())
                 .orElseThrow(() -> new EntityNotFoundException("NGO not found with ID: " + bookingRequest.getNgoId()));
 
-        int points = calculatePoints(bookingRequest.getWasteType());
-
         // 3. Create a new Booking entity
         Booking newBooking = Booking.builder()
                 .user(currentUser) // Link the booking to the current user
@@ -74,30 +72,20 @@ public class BookingService {
                 .notes(bookingRequest.getNotes())
                 .status(BookingStatus.PENDING) // Default status is PENDING
                 .bookingDate(LocalDateTime.now())
-                .pointsAwarded(points)
                 .build();
-
-        currentUser.setEcoPoints(currentUser.getEcoPoints() + points);
-        userRepository.save(currentUser);
 
         // 4. Save the booking to the database
         Booking savedBooking = bookingRepository.save(newBooking);
 
         // 5. Create and return the response DTO
-        return BookingResponseDto.builder()
-                .id(savedBooking.getId())
-                .wasteType(savedBooking.getWasteType())
-                .status(savedBooking.getStatus().name())
-                .bookingDate(savedBooking.getBookingDate())
-                .userName(savedBooking.getUser().getName())
-                .build();
+        return mapToBookingResponseDto(savedBooking);
     }
 
     // Simple point calculation logic
     private int calculatePoints(String wasteType) {
         return switch (wasteType.toLowerCase()) {
             case "e-waste", "batteries" -> 100;
-            case "plastic", "plastics" -> 50;
+            case "plastic", "metal" -> 50;
             case "paper", "cardboard" -> 25;
             case "clothes", "textiles" -> 40;
             default -> 10;

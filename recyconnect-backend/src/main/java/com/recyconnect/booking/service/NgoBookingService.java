@@ -89,8 +89,19 @@ public class NgoBookingService {
             throw new IllegalArgumentException("OTP has expired. Please ask the user for a new one.");
         }
 
+        // 1. Calculate points for this booking
+        int points = calculatePoints(booking.getWasteType());
+
+        // 2. Get the user who made the booking
+        User user = booking.getUser();
+
+        // 3. Update the user's total points
+        user.setEcoPoints(user.getEcoPoints() + points);
+        userRepository.save(user);
+
         // All checks passed, complete the booking
         booking.setStatus(BookingStatus.COMPLETED);
+        booking.setPointsAwarded(points);
         booking.setOtp(null); // Clear the OTP for security
         booking.setOtpExpiryDate(null);
 
@@ -121,5 +132,17 @@ public class NgoBookingService {
     // Helper method to generate a simple 6-digit OTP
     private String generateOtp() {
         return String.format("%06d", new Random().nextInt(999999));
+    }
+
+    // Helper method here (moved from BookingService)
+    private int calculatePoints(String wasteType) {
+        if (wasteType == null) return 10;
+        return switch (wasteType.toLowerCase()) {
+            case "e-waste", "batteries" -> 100;
+            case "plastic", "plastics", "metal" -> 50;
+            case "paper", "cardboard" -> 25;
+            case "clothes", "textiles" -> 40;
+            default -> 10;
+        };
     }
 }
