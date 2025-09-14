@@ -16,6 +16,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.recyconnect.review.repository.ReviewRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +31,7 @@ public class NgoBookingService {
     private final NgoRepository ngoRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final ReviewRepository reviewRepository;
 
     @Transactional(readOnly = true)
     public List<BookingResponseDto> getActiveBookingsForCurrentNgo() { // 👈 Renamed for clarity
@@ -120,12 +122,16 @@ public class NgoBookingService {
 
     // Helper to map entity to DTO
     private BookingResponseDto mapToBookingResponseDto(Booking booking) {
+        boolean hasReview = reviewRepository.existsByBookingId(booking.getId());
         return BookingResponseDto.builder()
                 .id(booking.getId())
                 .wasteType(booking.getWasteType())
                 .status(booking.getStatus().name())
                 .bookingDate(booking.getBookingDate())
                 .userName(booking.getUser().getName())
+                .ngoName(booking.getNgo().getName())
+                .ngoId(booking.getNgo().getId())
+                .reviewed(hasReview)
                 .build();
     }
 

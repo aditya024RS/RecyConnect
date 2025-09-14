@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.recyconnect.ngo.model.Ngo;
 import com.recyconnect.ngo.repository.NgoRepository;
 import jakarta.persistence.EntityNotFoundException;
+import com.recyconnect.review.repository.ReviewRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +27,7 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final NgoRepository ngoRepository;
+    private final ReviewRepository reviewRepository;
 
     @Transactional(readOnly = true)
     public List<BookingResponseDto> getBookingsForCurrentUser() {
@@ -43,12 +45,16 @@ public class BookingService {
 
     // Helper method to convert a Booking entity to a DTO
     private BookingResponseDto mapToBookingResponseDto(Booking booking) {
+        boolean hasReview = reviewRepository.existsByBookingId(booking.getId());
         return BookingResponseDto.builder()
                 .id(booking.getId())
                 .wasteType(booking.getWasteType())
                 .status(booking.getStatus().name())
                 .bookingDate(booking.getBookingDate())
                 .userName(booking.getUser().getName())
+                .ngoName(booking.getNgo().getName())
+                .ngoId(booking.getNgo().getId())
+                .reviewed(hasReview)
                 .build();
     }
 
@@ -72,6 +78,7 @@ public class BookingService {
                 .notes(bookingRequest.getNotes())
                 .status(BookingStatus.PENDING) // Default status is PENDING
                 .bookingDate(LocalDateTime.now())
+                .pointsAwarded(0)
                 .build();
 
         // 4. Save the booking to the database

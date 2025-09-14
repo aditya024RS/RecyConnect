@@ -13,4 +13,7 @@ public class BookingResponseDto {
     private String status;
     private LocalDateTime bookingDate;
     private String userName;
+    private String ngoName;
+    private Long ngoId;
+    private boolean reviewed;
 }
