@@ -19,6 +19,7 @@ const StatCard = ({ icon, title, value, color }) => (
 const UserDashboardPage = () => {
   const [userData, setUserData] = useState(null);
   const [bookings, setBookings] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -27,12 +28,14 @@ const UserDashboardPage = () => {
 
   const fetchData = useCallback(async () => {
     try {
-      const [userResponse, bookingsResponse] = await Promise.all([
+      const [userResponse, bookingsResponse, leaderboardResponse] = await Promise.all([
         api.get('/users/me'),
-        api.get('/bookings/my-bookings')
+        api.get('/bookings/my-bookings'),
+        api.get('/leaderboard')
       ]);
       setUserData(userResponse.data);
       setBookings(bookingsResponse.data);
+      setLeaderboard(leaderboardResponse.data);
     } catch (err) {
       setError('Could not fetch dashboard data.');
       console.error(err);
@@ -98,76 +101,124 @@ const UserDashboardPage = () => {
           <StatCard
             icon={<FaTrophy className="text-yellow-500" />}
             title="Your Rank"
-            value="#12"
+            value={`#${userData?.rank}`}
             color="bg-yellow-100"
           />
         </div>
 
-        {/* Become a Service Provider */}
-        <section className="my-8 p-6 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Join Our Network!
-          </h2>
-          <p className="text-gray-600 mt-2">
-            Are you a recycler or an NGO? Join our platform to connect with the
-            community and help us build a greener future.
-          </p>
-          <Link
-            to="/apply-ngo"
-            className="mt-4 inline-block bg-blue-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Become a Service Provider
-          </Link>
-        </section>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
 
-        {/* My Bookings Section */}
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">My Bookings</h2>
-          {bookings.length > 0 ? (
-            <ul className="space-y-4">
-              {bookings.map((booking) => (
-                <li key={booking.id} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-gray-700">
-                        {booking.wasteType} Pickup ({booking.ngoName})
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Booked on:{" "}
-                        {new Date(booking.bookingDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      {/* 👇 New logic for the button 👇 */}
-                      {booking.status === "COMPLETED" && !booking.reviewed && (
-                        <button
-                          onClick={() => handleReviewClick(booking)}
-                          className="bg-yellow-500 text-white text-xs font-bold py-1 px-3 rounded hover:bg-yellow-600"
-                        >
-                          Leave a Review
-                        </button>
-                      )}
-                      <div
-                        className={`text-sm font-bold py-1 px-3 rounded-full text-white ${
-                          booking.status === "PENDING"
-                            ? "bg-yellow-500"
-                            : booking.status === "ACCEPTED"
-                            ? "bg-blue-500"
-                            : booking.status === "COMPLETED"
-                            ? "bg-green-500"
-                            : "bg-red-500"
-                        }`}
-                      >
-                        {booking.status}
+            {/* Become a Service Provider */}
+            <section className="my-8 p-6 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+              <h2 className="text-2xl font-bold text-gray-800">
+                Join Our Network!
+              </h2>
+              <p className="text-gray-600 mt-2">
+                Are you a recycler or an NGO? Join our platform to connect with
+                the community and help us build a greener future.
+              </p>
+              <Link
+                to="/apply-ngo"
+                className="mt-4 inline-block bg-blue-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Become a Service Provider
+              </Link>
+            </section>
+
+            {/* My Bookings Section */}
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                My Bookings
+              </h2>
+              {bookings.length > 0 ? (
+                <ul className="space-y-4">
+                  {bookings.map((booking) => (
+                    <li key={booking.id} className="p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-gray-700">
+                            {booking.wasteType} Pickup ({booking.ngoName})
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Booked on:{" "}
+                            {new Date(booking.bookingDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          {/* 👇 New logic for the button 👇 */}
+                          {booking.status === "COMPLETED" &&
+                            !booking.reviewed && (
+                              <button
+                                onClick={() => handleReviewClick(booking)}
+                                className="bg-yellow-500 text-white text-xs font-bold py-1 px-3 rounded hover:bg-yellow-600"
+                              >
+                                Leave a Review
+                              </button>
+                            )}
+                          <div
+                            className={`text-sm font-bold py-1 px-3 rounded-full text-white ${
+                              booking.status === "PENDING"
+                                ? "bg-yellow-500"
+                                : booking.status === "ACCEPTED"
+                                ? "bg-blue-500"
+                                : booking.status === "COMPLETED"
+                                ? "bg-green-500"
+                                : "bg-red-500"
+                            }`}
+                          >
+                            {booking.status}
+                          </div>
+                        </div>
                       </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500">
+                  You haven't made any bookings yet.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Leaderboard is now DYNAMIC! */}
+          <div className="bg-white p-6 rounded-xl shadow-md">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              Leaderboard
+            </h2>
+            <ul className="space-y-4">
+              {leaderboard.map((user) => (
+                <li
+                  key={user.rank}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center">
+                    <span
+                      className={`font-bold text-lg mr-4 ${
+                        user.rank === 1
+                          ? "text-yellow-500"
+                          : user.rank === 2
+                          ? "text-gray-500"
+                          : user.rank === 3
+                          ? "text-orange-700"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      {user.rank}
+                    </span>
+                    <div>
+                      <p className="font-semibold text-gray-700">{user.name}</p>
+                      <p className="text-sm text-green-600">
+                        {user.ecoPoints} XP
+                      </p>
                     </div>
                   </div>
+                  {user.rank === 1 && <FaStar className="text-yellow-400" />}
                 </li>
               ))}
             </ul>
-          ) : (
-            <p className="text-gray-500">You haven't made any bookings yet.</p>
-          )}
+          </div>
         </div>
       </motion.div>
 
