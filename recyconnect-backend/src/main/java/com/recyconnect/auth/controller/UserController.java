@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.recyconnect.stats.service.GamificationService;
 
 @RestController
 @RequestMapping("/api/users")
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final GamificationService gamificationService;
 
     @GetMapping("/me")
     public ResponseEntity<UserDto> getCurrentUser() {
@@ -28,6 +30,9 @@ public class UserController {
         User user = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Get the user's rank
+        Long rank = gamificationService.getUserRank(user.getId());
+
         // Map the User entity to a UserDto
         UserDto userDto = UserDto.builder()
                 .id(user.getId())
@@ -35,6 +40,7 @@ public class UserController {
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .ecoPoints(user.getEcoPoints())
+                .rank(rank)
                 .build();
 
         return ResponseEntity.ok(userDto);
