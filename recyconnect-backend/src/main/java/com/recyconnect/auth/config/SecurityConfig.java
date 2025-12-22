@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/oauth2/**", "/api/stats", "/api/ngos/{ngoId}/reviews", "/api/leaderboard").permitAll()
+                        .requestMatchers("/auth/**", "/oauth2/**", "/api/stats", "/api/ngos/{ngoId}/reviews", "/api/leaderboard", "/ws/**").permitAll()
                         .requestMatchers("/api/ngo/**", "/api/users/**", "/api/bookings/**", "/api/reviews").authenticated()
                         .anyRequest().authenticated() // All other requests must be authenticated
                 )
@@ -52,6 +52,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Your frontend URL
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

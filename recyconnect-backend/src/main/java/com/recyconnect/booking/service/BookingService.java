@@ -31,16 +31,14 @@ public class BookingService {
 
     @Transactional(readOnly = true)
     public List<BookingResponseDto> getBookingsForCurrentUser() {
-        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(currentUserEmail)
+        // 1. Get current User by ID
+        String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+        // The repository might need an Integer, so we parse it
+        User currentUser = userRepository.findById(Integer.parseInt(currentUserId))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Booking> bookings = bookingRepository.findByUserIdOrderByBookingDateDesc(currentUser.getId());
-
-        // Convert the list of entities to a list of DTOs
-        return bookings.stream()
-                .map(this::mapToBookingResponseDto)
-                .collect(Collectors.toList());
+        return bookings.stream().map(this::mapToBookingResponseDto).collect(Collectors.toList());
     }
 
     // Helper method to convert a Booking entity to a DTO
@@ -60,31 +58,26 @@ public class BookingService {
 
     @Transactional
     public BookingResponseDto createBooking(BookingRequestDto bookingRequest) {
-        // 1. Get the currently logged-in user's email from the security context
-        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        // 2. Find the user entity from the database
-        User currentUser = userRepository.findByEmail(currentUserEmail)
-                .orElseThrow(() -> new RuntimeException("User not found for email: " + currentUserEmail));
+        // 1. Get current User by ID
+        String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findById(Integer.parseInt(currentUserId))
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Ngo targetNgo = ngoRepository.findById(bookingRequest.getNgoId())
                 .orElseThrow(() -> new EntityNotFoundException("NGO not found with ID: " + bookingRequest.getNgoId()));
 
-        // 3. Create a new Booking entity
         Booking newBooking = Booking.builder()
-                .user(currentUser) // Link the booking to the current user
+                .user(currentUser)
                 .ngo(targetNgo)
                 .wasteType(bookingRequest.getWasteType())
                 .notes(bookingRequest.getNotes())
-                .status(BookingStatus.PENDING) // Default status is PENDING
+                .status(BookingStatus.PENDING)
                 .bookingDate(LocalDateTime.now())
-                .pointsAwarded(0)
+                .pointsAwarded(0) // Default points
                 .build();
 
-        // 4. Save the booking to the database
         Booking savedBooking = bookingRepository.save(newBooking);
 
-        // 5. Create and return the response DTO
         return mapToBookingResponseDto(savedBooking);
     }
 

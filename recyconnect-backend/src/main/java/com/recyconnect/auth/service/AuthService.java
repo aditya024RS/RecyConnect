@@ -11,6 +11,7 @@ import com.recyconnect.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final PasswordResetTokenRepository tokenRepository;
     private final EmailService emailService;
+    private final UserPasswordDetailsService userPasswordDetailsService;
 
+    @Transactional
     public JwtAuthResponse signup(SignUpRequest request) {
         var user = User.builder()
                 .name(request.getName())
@@ -38,23 +41,29 @@ public class AuthService {
                 .ecoPoints(0)
                 .build();
         userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
+        UserDetails userDetails = userPasswordDetailsService.loadUserByUsername(request.getEmail());
+        var jwtToken = jwtService.generateToken(userDetails);
         return JwtAuthResponse.builder()
                 .token(jwtToken)
                 .role(user.getRole().name())
                 .build();
     }
 
+    @Transactional
     public JwtAuthResponse login(LoginRequest request) {
+        // This will now use the correct provider to find the user by EMAIL
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
         );
+
+        // If authentication succeeds, we generate a token
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password."));
         var jwtToken = jwtService.generateToken(user);
+
         return JwtAuthResponse.builder()
                 .token(jwtToken)
                 .role(user.getRole().name())

@@ -15,6 +15,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import NgoApplicationPage from './pages/NgoApplicationPage';
 import EditNgoProfilePage from './pages/EditNgoProfilePage';
+import NotificationHandler from './components/NotificationHandler';
 
 // Import the ProtectedRoute component
 import ProtectedRoute from './components/ProtectedRoute';
@@ -27,6 +28,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import OAuth2RedirectHandler from './pages/OAuth2RedirectHandler';
 
 function App() {
+  const isLoggedIn = !!localStorage.getItem('user_token');
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
@@ -42,6 +45,8 @@ function App() {
         pauseOnHover
         theme="light"
       />
+
+      {isLoggedIn && <NotificationHandler />}
       <main className="flex-grow container mx-auto p-6">
         <Routes>
 

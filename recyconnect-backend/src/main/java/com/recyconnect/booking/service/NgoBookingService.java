@@ -17,6 +17,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.recyconnect.review.repository.ReviewRepository;
+import com.recyconnect.stats.dto.NotificationDto;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +34,7 @@ public class NgoBookingService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final ReviewRepository reviewRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional(readOnly = true)
     public List<BookingResponseDto> getActiveBookingsForCurrentNgo() { // 👈 Renamed for clarity
@@ -64,7 +67,18 @@ public class NgoBookingService {
         booking.setOtp(otp);
         booking.setOtpExpiryDate(LocalDateTime.now().plusHours(24));
 
+        // Send the OTP email
         emailService.sendBookingAcceptedOtpEmail(booking.getUser().getEmail(), currentNgo.getName(), otp);
+
+        // The destination is specific to the user who made the booking
+        String targetUserId = booking.getUser().getId().toString();
+        String destination = "/queue/notifications/" + targetUserId;
+
+        // Real-time notification
+        String notificationMessage = "Your booking with " + currentNgo.getName() + " has been accepted!";
+
+        messagingTemplate.convertAndSend(destination, new NotificationDto(notificationMessage));
+        System.out.println("DEBUG: Notification sent successfully.");
 
         Booking updatedBooking = bookingRepository.save(booking);
         return mapToBookingResponseDto(updatedBooking);
@@ -113,10 +127,11 @@ public class NgoBookingService {
 
     // Helper method to get the NGO profile of the currently logged-in user
     private Ngo getCurrentNgo() {
-        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(currentUserEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return ngoRepository.findByUserId(currentUser.getId())
+        // Get ID string
+        String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // Fix: Parse ID and find by ID (NOT email)
+        return ngoRepository.findByUserId(Integer.parseInt(currentUserId))
                 .orElseThrow(() -> new RuntimeException("NGO profile not found for the current user"));
     }
 
