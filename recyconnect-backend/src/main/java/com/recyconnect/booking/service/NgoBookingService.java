@@ -71,14 +71,12 @@ public class NgoBookingService {
         emailService.sendBookingAcceptedOtpEmail(booking.getUser().getEmail(), currentNgo.getName(), otp);
 
         // The destination is specific to the user who made the booking
-        String targetUserId = booking.getUser().getId().toString();
-        String destination = "/queue/notifications/" + targetUserId;
+        String destination = "/queue/notifications/" + booking.getUser().getId();
 
         // Real-time notification
         String notificationMessage = "Your booking with " + currentNgo.getName() + " has been accepted!";
 
         messagingTemplate.convertAndSend(destination, new NotificationDto(notificationMessage));
-        System.out.println("DEBUG: Notification sent successfully.");
 
         Booking updatedBooking = bookingRepository.save(booking);
         return mapToBookingResponseDto(updatedBooking);

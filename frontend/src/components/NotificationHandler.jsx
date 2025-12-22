@@ -19,9 +19,6 @@ const NotificationHandler = () => {
 
     const client = new Client({
       webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
-      debug: (str) => {
-        console.log(new Date(), str);
-      },
       reconnectDelay: 5000,
     });
 
