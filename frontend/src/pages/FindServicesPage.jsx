@@ -23,6 +23,8 @@ const FindServicesPage = () => {
   const [bookingDetails, setBookingDetails] = useState({ wasteType: '', notes: '' });
   const [bookingStatus, setBookingStatus] = useState({ message: '', error: false });
 
+  const userRole = localStorage.getItem('user_role');
+
   const fetchRecyclers = useCallback(async (query, wasteType) => {
     setLoading(true);
     try {
@@ -76,6 +78,12 @@ const FindServicesPage = () => {
 
   // Function to open the modal
   const handleBookClick = (recycler) => {
+
+    if (userRole === 'ROLE_NGO') {
+        toast.warning("Service Providers (NGOs) cannot book pickups.");
+        return;
+    }
+
     setSelectedRecycler(recycler);
     setIsModalOpen(true);
     setBookingStatus({ message: '', error: false }); // Reset status

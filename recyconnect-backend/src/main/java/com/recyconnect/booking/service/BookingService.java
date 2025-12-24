@@ -1,5 +1,6 @@
 package com.recyconnect.booking.service;
 
+import com.recyconnect.auth.model.Role;
 import com.recyconnect.auth.model.User;
 import com.recyconnect.auth.repository.UserRepository;
 import com.recyconnect.booking.dto.BookingRequestDto;
@@ -8,6 +9,7 @@ import com.recyconnect.booking.model.Booking;
 import com.recyconnect.booking.model.BookingStatus;
 import com.recyconnect.booking.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +64,11 @@ public class BookingService {
         String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepository.findById(Integer.parseInt(currentUserId))
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Prevent NGOs from booking services (they are providers, not consumers)
+        if (currentUser.getRole() == Role.ROLE_NGO) {
+            throw new AccessDeniedException("Service Providers (NGOs) are not authorized to book pickups. Please log in as a standard User.");
+        }
 
         Ngo targetNgo = ngoRepository.findById(bookingRequest.getNgoId())
                 .orElseThrow(() -> new EntityNotFoundException("NGO not found with ID: " + bookingRequest.getNgoId()));
