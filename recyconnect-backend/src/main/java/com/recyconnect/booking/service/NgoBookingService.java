@@ -89,6 +89,39 @@ public class NgoBookingService {
     }
 
     @Transactional
+    public void resendOtp(Long bookingId) {
+        Ngo currentNgo = getCurrentNgo();
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found with ID: " + bookingId));
+
+        // Security check
+        if (!booking.getNgo().getId().equals(currentNgo.getId())) {
+            throw new AccessDeniedException("You are not authorized to access this booking.");
+        }
+
+        // Logic check: Can only resend OTP for ACCEPTED bookings
+        if (booking.getStatus() != BookingStatus.ACCEPTED) {
+            throw new IllegalStateException("OTP can only be resent for accepted bookings.");
+        }
+
+        // Generate new OTP and extend expiry
+        String newOtp = generateOtp();
+        booking.setOtp(newOtp);
+        booking.setOtpExpiryDate(LocalDateTime.now().plusHours(24));
+
+        // Send email
+        emailService.sendBookingAcceptedOtpEmail(
+                booking.getUser().getEmail(),
+                booking.getUser().getName(),
+                currentNgo.getName(),
+                newOtp,
+                booking.getWasteType()
+        );
+
+        bookingRepository.save(booking);
+    }
+
+    @Transactional
     public BookingResponseDto completeBookingWithOtp(Long bookingId, OtpVerificationRequestDto request) {
         Ngo currentNgo = getCurrentNgo();
         Booking booking = bookingRepository.findById(bookingId)

@@ -16,6 +16,22 @@ const NgoDashboardPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
 
+  // Cooldown state { bookingId: expiryTimestamp }
+  const [cooldowns, setCooldowns] = useState(() => {
+    const saved = localStorage.getItem('otp_cooldowns');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  // Force re-render every second to update timers
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const fetchRequests = async () => {
     try {
       const response = await api.get('/ngo/bookings/requests');
@@ -45,6 +61,30 @@ const NgoDashboardPage = () => {
     }
   };
 
+  const handleResendOtp = async (bookingId) => {
+    // Calculate new expiry (60 seconds from now)
+    const expiryTime = Date.now() + 60000;
+    
+    // Update State & LocalStorage
+    const newCooldowns = { ...cooldowns, [bookingId]: expiryTime };
+    setCooldowns(newCooldowns);
+    localStorage.setItem('otp_cooldowns', JSON.stringify(newCooldowns));
+
+    try {
+      await api.post(`/ngo/bookings/${bookingId}/resend-otp`);
+      toast.success("OTP has been resent successfully!");
+    } catch (error) {
+      console.error("Failed to resend OTP", error);
+      toast.error("Could not resend OTP. Please try again.");
+      
+      // Revert cooldown on error
+      const revertedCooldowns = { ...cooldowns };
+      delete revertedCooldowns[bookingId];
+      setCooldowns(revertedCooldowns);
+      localStorage.setItem('otp_cooldowns', JSON.stringify(revertedCooldowns));
+    }
+  };
+
   const handleCompleteClick = (booking) => {
       setSelectedBooking(booking);
       setIsModalOpen(true);
@@ -54,6 +94,13 @@ const NgoDashboardPage = () => {
       setIsModalOpen(false);
       setSelectedBooking(null);
       fetchRequests();
+  };
+
+  // Helper to get remaining seconds
+  const getRemainingTime = (bookingId) => {
+      if (!cooldowns[bookingId]) return 0;
+      const remaining = Math.ceil((cooldowns[bookingId] - now) / 1000);
+      return remaining > 0 ? remaining : 0;
   };
 
   if (loading) {
@@ -77,41 +124,63 @@ const NgoDashboardPage = () => {
         <div className="bg-white p-6 rounded-xl shadow-md">
           {requests.length > 0 ? (
             <ul className="space-y-4">
-              {requests.map((req) => (
-                <li
-                  key={req.id}
-                  className="p-4 bg-gray-50 rounded-lg flex flex-wrap justify-between items-center gap-4"
-                >
-                  <div>
-                    <p className="font-bold">{req.wasteType} Pickup</p>
-                    <p className="text-sm text-gray-600">
-                      Requested by: {req.userName}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      Date: {new Date(req.bookingDate).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="flex space-x-2">
-                    {req.status === "PENDING" && (
-                      <button
-                        onClick={() => handleAccept(req.id)}
-                        disabled={isSubmitting === req.id}
-                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 disabled:bg-blue-300"
-                      >
-                        {isSubmitting === req.id ? "Accepting..." : "Accept"}
-                      </button>
-                    )}
-                    {req.status === "ACCEPTED" && (
-                      <button
-                        onClick={() => handleCompleteClick(req)}
-                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                      >
-                        Complete
-                      </button>
-                    )}
-                  </div>
-                </li>
-              ))}
+              {requests.map((req) => {
+
+                const remainingSeconds = getRemainingTime(req.id);
+                
+                return (
+                  <li
+                    key={req.id}
+                    className="p-4 bg-gray-50 rounded-lg flex flex-wrap justify-between items-center gap-4"
+                  >
+                    <div>
+                      <p className="font-bold">{req.wasteType} Pickup</p>
+                      <p className="text-sm text-gray-600">
+                        Requested by: {req.userName}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Date: {new Date(req.bookingDate).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex space-x-2">
+                      {req.status === "PENDING" && (
+                        <button
+                          onClick={() => handleAccept(req.id)}
+                          disabled={isSubmitting === req.id}
+                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 disabled:bg-blue-300"
+                        >
+                          {isSubmitting === req.id ? "Accepting..." : "Accept"}
+                        </button>
+                      )}
+                      {req.status === "ACCEPTED" && (
+                        <>
+                          {/* Resend Button with Timer Logic */}
+                          <button
+                            onClick={() => handleResendOtp(req.id)}
+                            disabled={remainingSeconds > 0}
+                            className={`text-sm font-medium px-2 transition-colors ${
+                              remainingSeconds > 0 
+                              ? 'text-gray-400 cursor-not-allowed' 
+                              : 'text-blue-600 hover:text-blue-800 hover:underline'
+                            }`}
+                          >
+                            {remainingSeconds > 0 
+                              ? `Resend in ${remainingSeconds}s` 
+                              : 'Resend OTP'}
+                          </button>
+
+                          <button
+                            onClick={() => handleCompleteClick(req)}
+                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 ml-2"
+                          >
+                            Complete
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <p>No new booking requests.</p>

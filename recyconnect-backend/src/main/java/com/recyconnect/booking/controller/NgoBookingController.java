@@ -1,7 +1,6 @@
 package com.recyconnect.booking.controller;
 
 import com.recyconnect.booking.dto.BookingResponseDto;
-import com.recyconnect.booking.dto.UpdateStatusRequestDto;
 import com.recyconnect.booking.service.NgoBookingService;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +29,13 @@ public class NgoBookingController {
     public ResponseEntity<BookingResponseDto> acceptBooking(@PathVariable Long bookingId) {
         BookingResponseDto updatedBooking = ngoBookingService.acceptBooking(bookingId);
         return ResponseEntity.ok(updatedBooking);
+    }
+
+    // NEW ENDPOINT: Resend OTP
+    @PostMapping("/{bookingId}/resend-otp")
+    public ResponseEntity<Void> resendOtp(@PathVariable Long bookingId) {
+        ngoBookingService.resendOtp(bookingId);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{bookingId}/complete")
