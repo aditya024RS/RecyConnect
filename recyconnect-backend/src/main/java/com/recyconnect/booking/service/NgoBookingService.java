@@ -67,8 +67,14 @@ public class NgoBookingService {
         booking.setOtp(otp);
         booking.setOtpExpiryDate(LocalDateTime.now().plusHours(24));
 
-        // Send the OTP email
-        emailService.sendBookingAcceptedOtpEmail(booking.getUser().getEmail(), currentNgo.getName(), otp);
+        // UPDATED CALL: Passing userName and wasteType now
+        emailService.sendBookingAcceptedOtpEmail(
+                booking.getUser().getEmail(),
+                booking.getUser().getName(),
+                currentNgo.getName(),
+                otp,
+                booking.getWasteType()
+        );
 
         // The destination is specific to the user who made the booking
         String destination = "/queue/notifications/" + booking.getUser().getId();

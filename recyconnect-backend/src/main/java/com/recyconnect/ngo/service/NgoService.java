@@ -1,6 +1,7 @@
 package com.recyconnect.ngo.service;
 
 import com.recyconnect.auth.model.User;
+import com.recyconnect.auth.service.EmailService;
 import com.recyconnect.ngo.dto.NgoApplicationRequestDto;
 import com.recyconnect.ngo.model.Ngo;
 import com.recyconnect.ngo.model.NgoStatus;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NgoService {
 
     private final NgoRepository ngoRepository;
+    private final EmailService emailService;
 
     @Transactional
     public void applyForNgoStatus(NgoApplicationRequestDto request, User currentUser) {
@@ -31,5 +33,12 @@ public class NgoService {
                 .build();
 
         ngoRepository.save(newNgo);
+
+        // Trigger the Admin Alert
+        emailService.sendNgoApplicationAlert(
+                newNgo.getName(),
+                currentUser.getEmail(),
+                newNgo.getAddress()
+        );
     }
 }
