@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaLeaf, FaTrophy, FaCheckCircle, FaStar } from 'react-icons/fa';
+import { FaLeaf, FaTrophy, FaCheckCircle, FaStar, FaUser, FaBuilding } from 'react-icons/fa';
 import api from '../services/api';
 import Modal from '../components/Modal';
 import ReviewForm from '../components/ReviewForm';
+import { toast } from 'react-toastify';
 
 const StatCard = ({ icon, title, value, color }) => (
   <div className={`p-6 rounded-xl shadow-md flex items-center space-x-4 ${color}`}>
@@ -23,19 +24,20 @@ const UserDashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // NEW: State for Leaderboard Toggle ('USER' or 'NGO')
+  const [leaderboardType, setLeaderboardType] = useState('USER');
+
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
-      const [userResponse, bookingsResponse, leaderboardResponse] = await Promise.all([
+      const [userResponse, bookingsResponse] = await Promise.all([
         api.get('/users/me'),
-        api.get('/bookings/my-bookings'),
-        api.get('/leaderboard')
+        api.get('/bookings/my-bookings')
       ]);
       setUserData(userResponse.data);
       setBookings(bookingsResponse.data);
-      setLeaderboard(leaderboardResponse.data);
     } catch (err) {
       setError('Could not fetch dashboard data.');
       console.error(err);
@@ -43,6 +45,19 @@ const UserDashboardPage = () => {
       setLoading(false);
     }
   }, []);
+
+  // Specialized Fetch for Leaderboard (Triggered on Toggle)
+  useEffect(() => {
+      const fetchLeaderboard = async () => {
+          try {
+              const response = await api.get(`/leaderboard?type=${leaderboardType}`);
+              setLeaderboard(response.data);
+          } catch (error) {
+              console.error("Failed to fetch leaderboard", error);
+          }
+      };
+      fetchLeaderboard();
+  }, [leaderboardType]); // Re-run when toggle changes
 
   useEffect(() => {
       fetchData();
@@ -193,8 +208,6 @@ const UserDashboardPage = () => {
                                       try {
                                           await api.post(`/bookings/${booking.id}/cancel`);
                                           toast.info("Booking cancelled successfully.");
-                                          // refresh bookings function here
-                                          
                                       } catch (e) { toast.error("Failed to cance booking."); 
                                       } finally {
                                         fetchData();
@@ -233,20 +246,45 @@ const UserDashboardPage = () => {
             </div>
           </div>
 
-          {/* Leaderboard is now DYNAMIC! */}
-          <div className="bg-white p-6 rounded-xl shadow-md">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              Leaderboard
-            </h2>
+          {/* Leaderboard Section (With Toggle) */}
+          <div className="bg-white p-6 rounded-xl shadow-md h-fit">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Leaderboard</h2>
+            </div>
+            
+            {/* 👇 NEW: Toggle Buttons */}
+            <div className="flex bg-gray-100 p-1 rounded-lg mb-4">
+                <button 
+                    onClick={() => setLeaderboardType('USER')}
+                    className={`flex-1 flex items-center justify-center py-2 text-sm font-bold rounded-md transition-all ${
+                        leaderboardType === 'USER' 
+                        ? 'bg-white text-green-600 shadow-sm' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                    <FaUser className="mr-2"/> Users
+                </button>
+                <button 
+                    onClick={() => setLeaderboardType('NGO')}
+                    className={`flex-1 flex items-center justify-center py-2 text-sm font-bold rounded-md transition-all ${
+                        leaderboardType === 'NGO' 
+                        ? 'bg-white text-blue-600 shadow-sm' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                    <FaBuilding className="mr-2"/> NGOs
+                </button>
+            </div>
+
             <ul className="space-y-4">
-              {leaderboard.map((user) => (
+              {leaderboard.length > 0 ? leaderboard.map((user) => (
                 <li
                   key={user.rank}
-                  className="flex items-center justify-between"
+                  className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg transition-colors"
                 >
                   <div className="flex items-center">
                     <span
-                      className={`font-bold text-lg mr-4 ${
+                      className={`font-bold text-lg mr-4 w-6 text-center ${
                         user.rank === 1
                           ? "text-yellow-500"
                           : user.rank === 2
@@ -267,7 +305,9 @@ const UserDashboardPage = () => {
                   </div>
                   {user.rank === 1 && <FaStar className="text-yellow-400" />}
                 </li>
-              ))}
+              )) : (
+                  <p className="text-center text-gray-500 py-4">No data available.</p>
+              )}
             </ul>
           </div>
         </div>

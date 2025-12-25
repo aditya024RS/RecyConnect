@@ -16,9 +16,12 @@ public class GamificationService {
 
     private final UserRepository userRepository;
 
-    public List<LeaderboardDto> getLeaderboard() {
-        // CHANGED: Explicitly exclude ROLE_ADMIN from the fetch
-        List<User> topUsers = userRepository.findTop10ByRoleNotOrderByEcoPointsDesc(Role.ROLE_ADMIN);
+    // Update the method signature
+    public List<LeaderboardDto> getLeaderboard(Role role) {
+
+        // If role is null, we default to "USER"
+        // But for specific lists, we use the new method:
+        List<User> topUsers = userRepository.findTop10ByRoleOrderByEcoPointsDesc(role);
 
         AtomicLong rank = new AtomicLong(1);
 
