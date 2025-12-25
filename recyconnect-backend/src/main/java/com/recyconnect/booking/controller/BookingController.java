@@ -28,4 +28,10 @@ public class BookingController {
     public ResponseEntity<List<BookingResponseDto>> getMyBookings() {
         return ResponseEntity.ok(bookingService.getBookingsForCurrentUser());
     }
+
+    @PostMapping("/{bookingId}/cancel")
+    public ResponseEntity<BookingResponseDto> cancelBooking(@PathVariable Long bookingId) {
+        BookingResponseDto response = bookingService.cancelBooking(bookingId);
+        return ResponseEntity.ok(response);
+    }
 }

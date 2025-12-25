@@ -146,7 +146,7 @@ const UserDashboardPage = () => {
                           </p>
                         </div>
                         <div className="flex items-center gap-4">
-                          {/* 👇 New logic for the button 👇 */}
+                          {/* New logic for the button */}
                           {booking.status === "COMPLETED" &&
                             !booking.reviewed && (
                               <button
@@ -156,6 +156,29 @@ const UserDashboardPage = () => {
                                 Leave a Review
                               </button>
                             )}
+
+                          {/* Cancel Button */}
+                          {booking.status === 'PENDING' && (
+                              <button
+                                  onClick={async () => {
+                                      if(!window.confirm("Cancel this booking?")) return;
+                                      try {
+                                          await api.post(`/bookings/${booking.id}/cancel`);
+                                          toast.info("Booking cancelled successfully.");
+                                          // refresh bookings function here
+                                          
+                                      } catch (e) { toast.error("Failed to cance booking."); 
+                                      } finally {
+                                        fetchData();
+                                      }
+                                  }}
+                                  className="bg-red-100 text-red-600  px-3 py-1 rounded-full hover:bg-red-200 transition-colors"
+                              >
+                                  Cancel
+                              </button>
+                            )}
+
+                          {/* Status Badge */}
                           <div
                             className={`text-sm font-bold py-1 px-3 rounded-full text-white ${
                               booking.status === "PENDING"

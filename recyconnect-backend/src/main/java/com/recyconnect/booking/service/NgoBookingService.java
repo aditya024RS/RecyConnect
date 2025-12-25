@@ -46,6 +46,32 @@ public class NgoBookingService {
     }
 
     @Transactional
+    public BookingResponseDto rejectBooking(Long bookingId) {
+        Ngo currentNgo = getCurrentNgo();
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        // Security Check
+        if (!booking.getNgo().getId().equals(currentNgo.getId())) {
+            throw new AccessDeniedException("You are not authorized to reject this booking.");
+        }
+
+        // Logic Check
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new IllegalStateException("Only pending bookings can be rejected.");
+        }
+
+        booking.setStatus(BookingStatus.REJECTED);
+
+        // Optional: Notify User via WebSocket
+        String destination = "/queue/notifications/" + booking.getUser().getId();
+        messagingTemplate.convertAndSend(destination, new com.recyconnect.stats.dto.NotificationDto("Your booking with " + currentNgo.getName() + " was declined."));
+
+        Booking savedBooking = bookingRepository.save(booking);
+        return mapToBookingResponseDto(savedBooking);
+    }
+
+    @Transactional
     public BookingResponseDto acceptBooking(Long bookingId) {
         Ngo currentNgo = getCurrentNgo();
         Booking booking = bookingRepository.findById(bookingId)

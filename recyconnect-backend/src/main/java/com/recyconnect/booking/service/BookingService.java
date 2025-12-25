@@ -88,6 +88,27 @@ public class BookingService {
         return mapToBookingResponseDto(savedBooking);
     }
 
+    @Transactional
+    public BookingResponseDto cancelBooking(Long bookingId) {
+        String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        // Security Check
+        if (!booking.getUser().getId().equals(Integer.parseInt(currentUserId))) {
+            throw new AccessDeniedException("You are not authorized to cancel this booking.");
+        }
+
+        // Logic Check
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new IllegalStateException("Only pending bookings can be cancelled.");
+        }
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        Booking savedBooking = bookingRepository.save(booking);
+        return mapToBookingResponseDto(savedBooking);
+    }
+
     // Simple point calculation logic
     private int calculatePoints(String wasteType) {
         return switch (wasteType.toLowerCase()) {

@@ -144,13 +144,30 @@ const NgoDashboardPage = () => {
                     </div>
                     <div className="flex space-x-2">
                       {req.status === "PENDING" && (
-                        <button
-                          onClick={() => handleAccept(req.id)}
-                          disabled={isSubmitting === req.id}
-                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 disabled:bg-blue-300"
-                        >
-                          {isSubmitting === req.id ? "Accepting..." : "Accept"}
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleAccept(req.id)}
+                            disabled={isSubmitting === req.id}
+                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 disabled:bg-blue-300 mr-2"
+                          >
+                            {isSubmitting === req.id ? "Accepting..." : "Accept"}
+                          </button>
+                          
+                          {/* NEW: Reject Button */}
+                          <button
+                            onClick={async () => {
+                              if(!window.confirm("Are you sure you want to decline this request?")) return;
+                              try {
+                                await api.post(`/ngo/bookings/${req.id}/reject`);
+                                toast.info("Request declined.");
+                                fetchRequests();
+                              } catch (e) { toast.error("Failed to decline."); }
+                            }}
+                            className="bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200"
+                          >
+                            Decline
+                          </button>
+                        </>
                       )}
                       {req.status === "ACCEPTED" && (
                         <>

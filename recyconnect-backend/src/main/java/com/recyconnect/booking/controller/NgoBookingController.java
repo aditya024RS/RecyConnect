@@ -45,4 +45,10 @@ public class NgoBookingController {
         BookingResponseDto completedBooking = ngoBookingService.completeBookingWithOtp(bookingId, request);
         return ResponseEntity.ok(completedBooking);
     }
+
+    @PostMapping("/{bookingId}/reject")
+    public ResponseEntity<BookingResponseDto> rejectBooking(@PathVariable Long bookingId) {
+        BookingResponseDto response = ngoBookingService.rejectBooking(bookingId);
+        return ResponseEntity.ok(response);
+    }
 }
