@@ -84,8 +84,8 @@ const UserDashboardPage = () => {
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Stats Grid - Section 1: Gamification */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <StatCard
             icon={<FaLeaf className="text-green-500" />}
             title="Total Eco-Points"
@@ -104,6 +104,34 @@ const UserDashboardPage = () => {
             value={`#${userData?.rank}`}
             color="bg-yellow-100"
           />
+        </div>
+
+        {/* NEW: Stats Grid - Section 2: Real World Impact */}
+        <h3 className="text-xl font-bold text-gray-700 mb-4 ml-1">Your Environmental Impact 🌍</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+           <div className="p-6 rounded-xl shadow-sm bg-blue-50 border border-emerald-100 flex flex-col items-center text-center">
+              <span className="text-4xl mb-2">☁️</span>
+              <p className="text-sm text-gray-600 font-medium">CO2 Prevented</p>
+              <p className="text-2xl font-bold text-emerald-700">
+                {(userData.ecoPoints * 0.1).toFixed(1)} kg
+              </p>
+           </div>
+
+           <div className="p-6 rounded-xl shadow-sm bg-teal-50 border border-teal-100 flex flex-col items-center text-center">
+              <span className="text-4xl mb-2">⚡</span>
+              <p className="text-sm text-gray-600 font-medium">Energy Saved</p>
+              <p className="text-2xl font-bold text-teal-700">
+                {(userData.ecoPoints * 0.05).toFixed(1)} kWh
+              </p>
+           </div>
+
+           <div className="p-6 rounded-xl shadow-sm bg-lime-50 border border-lime-100 flex flex-col items-center text-center">
+              <span className="text-4xl mb-2">🌳</span>
+              <p className="text-sm text-gray-600 font-medium">Trees Equivalent</p>
+              <p className="text-2xl font-bold text-lime-700">
+                {(userData.ecoPoints / 500).toFixed(2)}
+              </p>
+           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
