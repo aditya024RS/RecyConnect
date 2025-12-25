@@ -101,7 +101,7 @@ const FindServicesPage = () => {
       // Close modal after a short delay
       setTimeout(() => {
         setIsModalOpen(false);
-      }, 2000);
+      }, 1000);
     } catch (error) {
       setBookingStatus({ message: 'Booking failed. Please try again.', error: true });
       console.error("Booking failed:", error);
