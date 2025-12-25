@@ -178,11 +178,22 @@ public class NgoBookingService {
         user.setEcoPoints(user.getEcoPoints() + points);
         userRepository.save(user);
 
+        // 4. NEW: Award 50% Points to the NGO's User Account
+        User ngoUser = currentNgo.getUser();
+        int ngoPoints = points / 2; // 50% commission
+        ngoUser.setEcoPoints(ngoUser.getEcoPoints() + ngoPoints);
+        userRepository.save(ngoUser);
+
         // All checks passed, complete the booking
         booking.setStatus(BookingStatus.COMPLETED);
         booking.setPointsAwarded(points);
         booking.setOtp(null); // Clear the OTP for security
         booking.setOtpExpiryDate(null);
+
+        // Notify User
+        String destination = "/queue/notifications/" + user.getId();
+        messagingTemplate.convertAndSend(destination,
+                new com.recyconnect.stats.dto.NotificationDto("Pickup Complete! You earned " + points + " EcoPoints."));
 
         Booking updatedBooking = bookingRepository.save(booking);
         return mapToBookingResponseDto(updatedBooking);
