@@ -40,6 +40,7 @@ public class MapService {
                 .latitude(ngo.getLatitude())
                 .longitude(ngo.getLongitude())
                 .wasteTypes(ngo.getAcceptedWasteTypes())
+                .address(ngo.getAddress())
                 .build();
     }
 }

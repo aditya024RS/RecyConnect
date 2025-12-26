@@ -2,6 +2,7 @@ import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import MapFlyTo from './MapFlyTo';
+import { FaRecycle, FaMapMarkerAlt } from 'react-icons/fa'; // Ensure react-icons is installed
 
 // This code manually sets the default icon paths for markers.
 import icon from 'leaflet-color-markers/img/marker-icon-2x-blue.png';
@@ -31,6 +32,9 @@ const userIcon = new L.Icon({
 const MapComponent = ({ userPosition, recyclers, onBookClick }) => {
   // Default center (Kolkata)
   const defaultPosition = [22.5726, 88.3639];
+  
+  // Get role for conditional rendering inside popups
+  const userRole = localStorage.getItem('user_role');
 
   return (
     <MapContainer center={defaultPosition} zoom={13} style={{ height: '60vh', width: '100%', zIndex: 0 }} className="rounded-lg shadow-lg relative z-0">
@@ -42,15 +46,52 @@ const MapComponent = ({ userPosition, recyclers, onBookClick }) => {
       {/* Render a marker for each recycler */}
       {recyclers && recyclers.map(recycler => (
         <Marker key={recycler.id} position={[recycler.latitude, recycler.longitude]}>
-          <Popup>
-            <div className="font-bold text-lg">{recycler.name}</div>
-            <p>Accepts: {recycler.wasteTypes.join(', ')}</p>
-            <button 
-              onClick={() => onBookClick(recycler)} 
-              className="mt-2 w-full bg-green-500 text-white text-sm font-bold py-1 px-3 rounded hover:bg-green-600 transition-colors"
-            >
-              Book Pickup
-            </button>
+          <Popup className="custom-popup">
+            <div className="p-1 min-w-[200px]">
+                {/* Header */}
+                <div className="flex items-center gap-2 border-b pb-2 mb-2">
+                    <div className="bg-blue-100 p-2 rounded-full text-blue-600">
+                        <FaRecycle />
+                    </div>
+                    <h3 className="font-bold text-gray-800 text-base m-0 leading-tight">
+                        {recycler.name}
+                    </h3>
+                </div>
+
+                {/* Details */}
+                <div className="space-y-2 mb-3">
+                    <div className="flex items-start gap-2 text-gray-600 text-sm">
+                        <FaMapMarkerAlt className="mt-1 flex-shrink-0" />
+                        <p className="m-0 leading-snug">{recycler.address}</p>
+                    </div>
+                    <div>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                            Accepts:
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                            {recycler.wasteTypes.map((type, i) => (
+                                <span key={i} className="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded border border-green-100">
+                                    {type}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Action Button - Only for Users */}
+                {userRole !== 'ROLE_NGO' ? (
+                    <button 
+                      onClick={() => onBookClick(recycler)} 
+                      className="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded transition-colors shadow-sm"
+                    >
+                      Book Pickup
+                    </button>
+                ) : (
+                    <div className="text-center text-xs text-gray-400 italic border-t pt-2">
+                        Provider View
+                    </div>
+                )}
+            </div>
           </Popup>
         </Marker>
       ))}
@@ -58,7 +99,9 @@ const MapComponent = ({ userPosition, recyclers, onBookClick }) => {
       {/* Conditionally render marker for user's location */}
       {userPosition && (
         <Marker position={userPosition} icon={userIcon}>
-          <Popup>You are here!</Popup>
+          <Popup>
+            <div className="text-center font-medium">You are here! 📍</div>
+          </Popup>
         </Marker>
       )}
 

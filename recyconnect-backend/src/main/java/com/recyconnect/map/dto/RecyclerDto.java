@@ -17,4 +17,5 @@ public class RecyclerDto {
     private double latitude;
     private double longitude;
     private List<String> wasteTypes;
+    private String address;
 }
