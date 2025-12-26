@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import MapComponent from '../components/MapComponent';
 import Modal from '../components/Modal';
-import { FaMapMarkerAlt, FaSearch } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaSearch, FaFilter, FaRecycle, FaStickyNote } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import api from '../services/api';
 import debounce from 'lodash.debounce';
@@ -23,6 +23,9 @@ const FindServicesPage = () => {
   const [bookingDetails, setBookingDetails] = useState({ wasteType: '', notes: '' });
   const [bookingStatus, setBookingStatus] = useState({ message: '', error: false });
 
+  // NEW: State to prevent double clicks
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const userRole = localStorage.getItem('user_role');
 
   const fetchRecyclers = useCallback(async (query, wasteType) => {
@@ -42,23 +45,19 @@ const FindServicesPage = () => {
     }
   }, []);
 
-  // Create a debounced version of the fetch function
   const debouncedFetch = useCallback(debounce(fetchRecyclers, 500), [fetchRecyclers]);
 
-  // useEffect for initial data load
   useEffect(() => {
     const token = localStorage.getItem('user_token');
     if (token) {
-      fetchRecyclers('', ''); // Fetch all recyclers initially
+      fetchRecyclers('', ''); 
     } else {
-      setLoading(false); // If not logged in, just stop loading
+      setLoading(false); 
     }
   }, [fetchRecyclers]);
 
-  // useEffect for handling filter changes
   useEffect(() => {
     debouncedFetch(searchQuery, selectedWasteType);
-    // Cleanup the debounce function on component unmount
     return () => debouncedFetch.cancel();
   }, [searchQuery, selectedWasteType, debouncedFetch]);
 
@@ -67,7 +66,6 @@ const FindServicesPage = () => {
       (position) => {
         const { latitude, longitude } = position.coords;
         setUserPosition([latitude, longitude]);
-        console.log('Location found:', [latitude, longitude]);
       },
       (error) => {
         console.error("Error getting user location:", error);
@@ -76,9 +74,7 @@ const FindServicesPage = () => {
     );
   };
 
-  // Function to open the modal
   const handleBookClick = (recycler) => {
-
     if (userRole === 'ROLE_NGO') {
         toast.warning("Service Providers (NGOs) cannot book pickups.");
         return;
@@ -86,11 +82,19 @@ const FindServicesPage = () => {
 
     setSelectedRecycler(recycler);
     setIsModalOpen(true);
-    setBookingStatus({ message: '', error: false }); // Reset status
+    setBookingStatus({ message: '', error: false }); 
+    setIsSubmitting(false); // Reset submission state when opening modal
+    setBookingDetails({ wasteType: '', notes: '' });
   };
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent duplicate submissions
+    if (isSubmitting) return;
+
+    setIsSubmitting(true); // Lock the button
+
     try {
       const payload = {
         ...bookingDetails,
@@ -98,113 +102,158 @@ const FindServicesPage = () => {
       };
       const response = await api.post('/bookings', payload);
       setBookingStatus({ message: `Success! Booking ID: ${response.data.id}`, error: false });
+      
       // Close modal after a short delay
       setTimeout(() => {
         setIsModalOpen(false);
-      }, 1000);
+        // We don't need to reset isSubmitting here because the modal closes, 
+        // and handleBookClick resets it next time.
+      }, 2000);
     } catch (error) {
       setBookingStatus({ message: 'Booking failed. Please try again.', error: true });
       console.error("Booking failed:", error);
+      setIsSubmitting(false); // Unlock button only on error so they can retry
     }
   };
 
   return (
-    <div className="animate-fade-in relative">
-      <div className="text-center mb-6">
-        <h1 className="text-4xl font-bold text-gray-800">Find Recycling Services</h1>
-        <p className="text-lg text-gray-600 mt-2">Search for a specific service or filter by waste type.</p>
+    <div className="animate-fade-in relative container mx-auto px-4 py-6">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-extrabold text-gray-800 tracking-tight">Find Recycling Services</h1>
+        <p className="text-lg text-gray-500 mt-2 max-w-2xl mx-auto">
+            Locate nearest recycling centers or NGOs and schedule a pickup instantly.
+        </p>
       </div>
 
       {/* Filter and Search Controls */}
-      <div className="mb-6 p-4 bg-white rounded-lg shadow-md flex flex-col md:flex-row gap-4 items-center">
-        {/* Search Bar */}
-        <div className="relative w-full md:w-1/2">
-          <FaSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
+      <div className="mb-8 p-5 bg-white rounded-2xl shadow-lg border border-gray-100 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="relative w-full md:w-3/5">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <FaSearch className="text-gray-400 text-lg" />
+          </div>
           <input
             type="text"
-            placeholder="Search by name or address..."
+            placeholder="Search by name, address, or landmark..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-green-500 focus:border-green-500"
+            className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent focus:bg-white transition-all outline-none text-base shadow-sm"
           />
         </div>
-        {/* Waste Type Filter */}
-        <div className="w-full md:w-1/2">
-          <select
-            value={selectedWasteType}
-            onChange={(e) => setSelectedWasteType(e.target.value)}
-            className="w-full py-2 px-3 border rounded-lg focus:ring-green-500 focus:border-green-500"
-          >
-            <option value="">All Waste Types</option>
-            {WASTE_TYPES.map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
+
+        <div className="relative w-full md:w-2/5">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <FaFilter className="text-gray-400" />
+            </div>
+            <select
+                value={selectedWasteType}
+                onChange={(e) => setSelectedWasteType(e.target.value)}
+                className="w-full pl-11 pr-10 py-3 bg-gray-50 border border-gray-200 text-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent focus:bg-white transition-all outline-none appearance-none cursor-pointer shadow-sm"
+            >
+                <option value="">All Waste Types</option>
+                {WASTE_TYPES.map(type => (
+                <option key={type} value={type}>{type}</option>
+                ))}
+            </select>
+             <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+            </div>
         </div>
       </div>
 
-      {/* We pass the user's position down to the MapComponent */}
-      <div className="relative">
+      {/* Map Section */}
+      <div className="relative rounded-2xl overflow-hidden shadow-xl border border-gray-200">
         {loading ? (
-            <div className="flex justify-center items-center h-[60vh] bg-gray-100 rounded-lg">Loading Map...</div>
+            <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 text-gray-500">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
+                <p>Locating recyclers...</p>
+            </div>
         ) : (
             <MapComponent userPosition={userPosition} recyclers={recyclers} onBookClick={handleBookClick} />
         )}
+        
         <button
           onClick={handleFindMe}
-          className="absolute top-4 right-4 z-[800] bg-white text-green-600 font-bold py-2 px-4 rounded-full shadow-lg hover:bg-green-50 transition-transform transform hover:scale-105 flex items-center space-x-2"
+          className="absolute top-4 right-4 z-[800] bg-white text-gray-700 hover:text-green-600 font-bold py-2.5 px-5 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 border border-gray-100"
         >
-          <FaMapMarkerAlt />
-          <span>Find Me</span>
+          <FaMapMarkerAlt className="text-red-500" />
+          <span>Locate Me</span>
         </button>
       </div>
 
-      {/* Booking Modal */}
+      {/* Enhanced Booking Modal */}
       <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title={`Book Pickup with ${selectedRecycler?.name}`}
+        title={`Schedule Pickup`} 
       >
-        <form onSubmit={handleBookingSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="wasteType" className="block text-sm font-medium text-gray-700">Type of Waste</label>
-              <select
-                id="wasteType"
-                value={bookingDetails.wasteType}
-                onChange={(e) => setBookingDetails({ ...bookingDetails, wasteType: e.target.value })}
-                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md"
-                required
-              >
-                <option value="" disabled>Select a type</option>
-                {selectedRecycler?.wasteTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
+        <div className="px-1">
+            <div className="mb-6 pb-4 border-b border-gray-100">
+                <p className="text-sm text-gray-500 mb-1">Provider</p>
+                <h3 className="text-xl font-bold text-gray-800">{selectedRecycler?.name}</h3>
+                <p className="text-xs text-gray-400">{selectedRecycler?.address}</p>
             </div>
+
+            <form onSubmit={handleBookingSubmit} className="space-y-5">
             <div>
-              <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Additional Notes (Optional)</label>
-              <textarea
-                id="notes"
-                rows={3}
-                value={bookingDetails.notes}
-                onChange={(e) => setBookingDetails({ ...bookingDetails, notes: e.target.value })}
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
-                placeholder="e.g., Items are in a blue bag near the gate."
-              />
+                <label htmlFor="wasteType" className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                    <FaRecycle className="text-green-600"/> Type of Waste
+                </label>
+                <div className="relative">
+                    <select
+                    id="wasteType"
+                    value={bookingDetails.wasteType}
+                    onChange={(e) => setBookingDetails({ ...bookingDetails, wasteType: e.target.value })}
+                    className="block w-full pl-3 pr-10 py-3 text-base border-gray-300 bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-colors"
+                    required
+                    >
+                        <option value="" disabled>Select a category...</option>
+                        {selectedRecycler?.wasteTypes.map(type => (
+                            <option key={type} value={type}>{type}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
-          </div>
-          <div className="mt-6">
-            <button type="submit" className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-              Confirm Booking
-            </button>
-          </div>
-          {bookingStatus.message && (
-            <p className={`mt-4 text-center text-sm ${bookingStatus.error ? 'text-red-600' : 'text-green-600'}`}>
-              {bookingStatus.message}
-            </p>
-          )}
-        </form>
+
+            <div>
+                <label htmlFor="notes" className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+                    <FaStickyNote className="text-yellow-500"/> Additional Instructions
+                </label>
+                <textarea
+                    id="notes"
+                    rows={3}
+                    value={bookingDetails.notes}
+                    onChange={(e) => setBookingDetails({ ...bookingDetails, notes: e.target.value })}
+                    className="block w-full p-3 border border-gray-300 bg-gray-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-colors resize-none"
+                    placeholder="e.g., Gate code is 1234, Call upon arrival..."
+                />
+            </div>
+
+            <div className="pt-4">
+                {/* MODIFIED BUTTON: Disabled when submitting */}
+                <button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className={`w-full flex justify-center items-center gap-2 font-bold py-3.5 px-4 rounded-xl shadow-md transform transition-all focus:outline-none focus:ring-4 focus:ring-green-200
+                        ${isSubmitting 
+                            ? 'bg-gray-400 cursor-not-allowed' 
+                            : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:shadow-lg active:scale-95 text-white'
+                        }`}
+                >
+                    
+                    Confirm Pickup Request
+                    
+                </button>
+            </div>
+
+            {bookingStatus.message && (
+                <div className={`mt-4 p-3 rounded-lg text-center text-sm font-medium ${bookingStatus.error ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}>
+                {bookingStatus.message}
+                </div>
+            )}
+            </form>
+        </div>
       </Modal>
     </div>
   );
