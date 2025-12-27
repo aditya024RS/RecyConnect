@@ -44,10 +44,10 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedAdminUser() {
-        if (userRepository.findByEmail("admin@recyconnect.com").isEmpty()) {
+        if (userRepository.findByEmail("recyconnecta@gmail.com").isEmpty()) {
             User admin = User.builder()
                     .name("Super Admin")
-                    .email("admin@recyconnect.com")
+                    .email("recyconnecta@gmail.com")
                     .password(passwordEncoder.encode("A@RC2468")) // Change this password!
                     .role(Role.ROLE_ADMIN)
                     .ecoPoints(0)

@@ -23,7 +23,6 @@ const NotificationHandler = () => {
     });
 
     client.onConnect = (frame) => {
-      console.log('Connected: ' + frame);
       // Subscribe to the user-specific notification queue
       client.subscribe(`/queue/notifications/${userId}`, (message) => {
         const notification = JSON.parse(message.body);
@@ -42,7 +41,6 @@ const NotificationHandler = () => {
     // Cleanup on component unmount
     return () => {
       client.deactivate();
-      console.log('WebSocket disconnected.');
     };
   }, []); // Empty dependency array ensures this runs only once
 
