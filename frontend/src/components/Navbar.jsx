@@ -4,6 +4,7 @@ import { FiMenu, FiX } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import authService from '../services/authService';
+import NotificationBell from './NotificationBell'; // Import Bell
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -55,6 +56,10 @@ const Navbar = () => {
           {isLoggedIn ? (
             <>
               <Link to="/dashboard" className="text-gray-600 hover:text-green-600 transition-colors">Dashboard</Link>
+              {/* NEW: Notification Bell (Only for logged-in users) */}
+              <div className="border-r border-gray-300 pr-4 mr-2">
+                 <NotificationBell />
+              </div>
               {isAdmin && <Link to="/admin/dashboard" className="text-blue-600 font-bold hover:text-blue-800">Admin</Link>}
               <button onClick={handleLogout} className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
                 Logout
@@ -69,7 +74,10 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-4">
+          {/* Show Bell on Mobile too if logged in */}
+          {isLoggedIn && <NotificationBell />}
+          
           <button onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>

@@ -10,6 +10,7 @@ import com.recyconnect.booking.model.BookingStatus;
 import com.recyconnect.booking.repository.BookingRepository;
 import com.recyconnect.ngo.model.Ngo;
 import com.recyconnect.ngo.repository.NgoRepository;
+import com.recyconnect.notification.service.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,8 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.recyconnect.review.repository.ReviewRepository;
-import com.recyconnect.stats.dto.NotificationDto;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,7 +33,7 @@ public class NgoBookingService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final ReviewRepository reviewRepository;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public List<BookingResponseDto> getActiveBookingsForCurrentNgo() { // 👈 Renamed for clarity
@@ -63,9 +62,11 @@ public class NgoBookingService {
 
         booking.setStatus(BookingStatus.REJECTED);
 
-        // Optional: Notify User via WebSocket
-        String destination = "/queue/notifications/" + booking.getUser().getId();
-        messagingTemplate.convertAndSend(destination, new com.recyconnect.stats.dto.NotificationDto("Your booking with " + currentNgo.getName() + " was declined."));
+        // Send Persistent Notification
+        notificationService.sendNotification(
+                booking.getUser(),
+                "Your booking with " + currentNgo.getName() + " was declined."
+        );
 
         Booking savedBooking = bookingRepository.save(booking);
         return mapToBookingResponseDto(savedBooking);
@@ -102,13 +103,11 @@ public class NgoBookingService {
                 booking.getWasteType()
         );
 
-        // The destination is specific to the user who made the booking
-        String destination = "/queue/notifications/" + booking.getUser().getId();
-
-        // Real-time notification
-        String notificationMessage = "Your booking with " + currentNgo.getName() + " has been accepted!";
-
-        messagingTemplate.convertAndSend(destination, new NotificationDto(notificationMessage));
+        // Send Persistent Notification
+        notificationService.sendNotification(
+                booking.getUser(),
+                "Your pickup request accepted by " + currentNgo.getName() + "! Check your email for the OTP."
+        );
 
         Booking updatedBooking = bookingRepository.save(booking);
         return mapToBookingResponseDto(updatedBooking);
@@ -145,6 +144,8 @@ public class NgoBookingService {
         );
 
         bookingRepository.save(booking);
+        // Notify user that OTP was resent
+        notificationService.sendNotification(booking.getUser(), "A new OTP has been sent to your email.");
     }
 
     @Transactional
@@ -190,10 +191,11 @@ public class NgoBookingService {
         booking.setOtp(null); // Clear the OTP for security
         booking.setOtpExpiryDate(null);
 
-        // Notify User
-        String destination = "/queue/notifications/" + user.getId();
-        messagingTemplate.convertAndSend(destination,
-                new com.recyconnect.stats.dto.NotificationDto("Pickup Complete! You earned " + points + " EcoPoints."));
+        // 👇 UPDATED: Send Persistent Notification
+        notificationService.sendNotification(
+                user,
+                "Pickup Complete! You earned " + points + " EcoPoints."
+        );
 
         Booking updatedBooking = bookingRepository.save(booking);
         return mapToBookingResponseDto(updatedBooking);
@@ -214,12 +216,15 @@ public class NgoBookingService {
         boolean hasReview = reviewRepository.existsByBookingId(booking.getId());
         return BookingResponseDto.builder()
                 .id(booking.getId())
+                .userId(Long.valueOf(booking.getUser().getId()))
                 .wasteType(booking.getWasteType())
                 .status(booking.getStatus().name())
+                .notes(booking.getNotes())
                 .bookingDate(booking.getBookingDate())
                 .userName(booking.getUser().getName())
                 .ngoName(booking.getNgo().getName())
                 .ngoId(booking.getNgo().getId())
+                .pointsAwarded(booking.getPointsAwarded())
                 .reviewed(hasReview)
                 .build();
     }

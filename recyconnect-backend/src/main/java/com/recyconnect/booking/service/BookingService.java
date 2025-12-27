@@ -17,6 +17,7 @@ import com.recyconnect.ngo.model.Ngo;
 import com.recyconnect.ngo.repository.NgoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import com.recyconnect.review.repository.ReviewRepository;
+import com.recyconnect.notification.service.NotificationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +31,7 @@ public class BookingService {
     private final UserRepository userRepository;
     private final NgoRepository ngoRepository;
     private final ReviewRepository reviewRepository;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public List<BookingResponseDto> getBookingsForCurrentUser() {
@@ -48,12 +50,15 @@ public class BookingService {
         boolean hasReview = reviewRepository.existsByBookingId(booking.getId());
         return BookingResponseDto.builder()
                 .id(booking.getId())
+                .userId(Long.valueOf(booking.getUser().getId()))
                 .wasteType(booking.getWasteType())
                 .status(booking.getStatus().name())
+                .notes(booking.getNotes())
                 .bookingDate(booking.getBookingDate())
                 .userName(booking.getUser().getName())
                 .ngoName(booking.getNgo().getName())
                 .ngoId(booking.getNgo().getId())
+                .pointsAwarded(booking.getPointsAwarded())
                 .reviewed(hasReview)
                 .build();
     }
@@ -85,6 +90,12 @@ public class BookingService {
 
         Booking savedBooking = bookingRepository.save(newBooking);
 
+        // 👇 NEW: Notify the NGO (via their linked User account)
+        notificationService.sendNotification(
+                targetNgo.getUser(),
+                "New Booking Request: " + bookingRequest.getWasteType() + " from " + currentUser.getName()
+        );
+
         return mapToBookingResponseDto(savedBooking);
     }
 
@@ -105,18 +116,14 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.CANCELLED);
+
+        // Notify the NGO
+        notificationService.sendNotification(
+                booking.getNgo().getUser(),
+                "Booking #" + bookingId + " was cancelled by the user."
+        );
+
         Booking savedBooking = bookingRepository.save(booking);
         return mapToBookingResponseDto(savedBooking);
-    }
-
-    // Simple point calculation logic
-    private int calculatePoints(String wasteType) {
-        return switch (wasteType.toLowerCase()) {
-            case "e-waste", "batteries" -> 100;
-            case "plastic", "metal" -> 50;
-            case "paper", "cardboard" -> 25;
-            case "clothes", "textiles" -> 40;
-            default -> 10;
-        };
     }
 }

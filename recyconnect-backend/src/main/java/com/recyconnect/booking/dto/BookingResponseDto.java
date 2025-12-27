@@ -15,5 +15,8 @@ public class BookingResponseDto {
     private String userName;
     private String ngoName;
     private Long ngoId;
+    private Long userId;
+    private String notes;
+    private Integer pointsAwarded;
     private boolean reviewed;
 }
