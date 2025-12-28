@@ -2,7 +2,7 @@ import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import MapFlyTo from './MapFlyTo';
-import { FaRecycle, FaMapMarkerAlt } from 'react-icons/fa'; // Ensure react-icons is installed
+import { FaRecycle, FaMapMarkerAlt, FaStar, FaTrophy } from 'react-icons/fa'; // Ensure react-icons is installed
 
 // This code manually sets the default icon paths for markers.
 import icon from 'leaflet-color-markers/img/marker-icon-2x-blue.png';
@@ -53,24 +53,40 @@ const MapComponent = ({ userPosition, recyclers, onBookClick }) => {
                     <div className="bg-blue-100 p-2 rounded-full text-blue-600">
                         <FaRecycle />
                     </div>
-                    <h3 className="font-bold text-gray-800 text-base m-0 leading-tight">
-                        {recycler.name}
-                    </h3>
+                    <div>
+                        <h3 className="font-bold text-gray-800 text-base m-0 leading-tight">
+                            {recycler.name}
+                        </h3>
+                        {/* NEW: Star Rating Display */}
+                        <div className="flex items-center gap-1 mt-1">
+                            <FaStar className="text-yellow-400 text-xs" />
+                            <span className="text-xs font-bold text-gray-700">
+                                {recycler.averageRating > 0 ? recycler.averageRating.toFixed(1) : "New"}
+                            </span>
+                            <span className="text-[10px] text-gray-400 ml-1">
+                                ({recycler.completedPickups} pickups)
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Details */}
                 <div className="space-y-2 mb-3">
+                    {/* NEW: Verified Badge if pickups > 10 */}
+                    {recycler.completedPickups > 10 && (
+                        <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-1">
+                            <FaTrophy className="text-green-600" /> Top Recycler
+                        </div>
+                    )}
+
                     <div className="flex items-start gap-2 text-gray-600 text-sm">
-                        <FaMapMarkerAlt className="mt-1 flex-shrink-0" />
-                        <p className="m-0 leading-snug">{recycler.address}</p>
+                        <FaMapMarkerAlt className="mt-1 flex-shrink-0 text-red-400" />
+                        <p className="m-0 leading-snug text-xs">{recycler.address}</p>
                     </div>
                     <div>
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                            Accepts:
-                        </p>
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-1 mt-2">
                             {recycler.wasteTypes.map((type, i) => (
-                                <span key={i} className="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded border border-green-100">
+                                <span key={i} className="bg-gray-100 text-gray-600 text-[10px] font-semibold px-2 py-0.5 rounded border border-gray-200">
                                     {type}
                                 </span>
                             ))}

@@ -15,4 +15,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByNgoIdAndStatusInOrderByBookingDateAsc(Long ngoId, Collection<BookingStatus> statuses);
 
     long countByStatus(BookingStatus status);
+
+    // NEW: Count completed pickups
+    int countByNgoIdAndStatus(Long ngoId, BookingStatus status);
 }

@@ -38,7 +38,7 @@ const FindServicesPage = () => {
       const response = await api.get(`/map/recyclers?${params.toString()}`);
       setRecyclers(response.data);
     } catch (error) {
-      toast.error("Could not load recycler locations.");
+      toast.error("Could not load recycler locations. Please Login, to continue!");
       console.error("Failed to fetch recycler locations:", error);
     } finally {
       setLoading(false);

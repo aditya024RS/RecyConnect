@@ -1,9 +1,12 @@
 package com.recyconnect.map.service;
 
+import com.recyconnect.booking.model.BookingStatus;
+import com.recyconnect.booking.repository.BookingRepository;
 import com.recyconnect.map.dto.RecyclerDto;
 import com.recyconnect.ngo.model.Ngo;
 import com.recyconnect.ngo.model.NgoStatus;
 import com.recyconnect.ngo.repository.NgoRepository;
+import com.recyconnect.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +19,8 @@ import java.util.stream.Collectors;
 public class MapService {
 
     private final NgoRepository ngoRepository;
+    private final BookingRepository bookingRepository;
+    private final ReviewRepository reviewRepository;
 
     @Transactional(readOnly = true)
     public List<RecyclerDto> getActiveRecyclers(String wasteType, String query) {
@@ -29,18 +34,14 @@ public class MapService {
         );
 
         return activeNgos.stream()
-                .map(this::mapToRecyclerDto)
-                .collect(Collectors.toList());
-    }
+                .map(ngo -> {
+                    // Fetch Stats for each NGO
+                    int pickups = bookingRepository.countByNgoIdAndStatus(ngo.getId(), BookingStatus.COMPLETED);
+                    Double rating = reviewRepository.getAverageRatingByNgoId(ngo.getId());
 
-    private RecyclerDto mapToRecyclerDto(Ngo ngo) {
-        return RecyclerDto.builder()
-                .id(ngo.getId())
-                .name(ngo.getName())
-                .latitude(ngo.getLatitude())
-                .longitude(ngo.getLongitude())
-                .wasteTypes(ngo.getAcceptedWasteTypes())
-                .address(ngo.getAddress())
-                .build();
+                    // Use updated builder
+                    return RecyclerDto.fromEntity(ngo, rating, pickups);
+                })
+                .collect(Collectors.toList());
     }
 }
