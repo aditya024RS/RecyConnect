@@ -1,6 +1,7 @@
 package com.recyconnect.auth.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -26,6 +27,9 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -49,7 +53,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Your frontend URL
+        configuration.setAllowedOrigins(List.of(frontendUrl)); // Your frontend URL
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

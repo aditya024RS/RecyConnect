@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -23,6 +24,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -46,7 +50,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String token = jwtService.generateToken(user);
 
         // Redirect back to the frontend with the JWT
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/login/oauth2/success")
+        String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/login/oauth2/success")
                 .queryParam("token", token)
                 .queryParam("role", user.getRole().name())
                 .build().toUriString();

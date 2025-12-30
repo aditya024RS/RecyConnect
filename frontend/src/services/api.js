@@ -1,16 +1,16 @@
 import axios from 'axios';
 
+// Access the environment variable
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api', // Base URL for non-auth endpoints
+  baseURL: `${BASE_URL}/api`, // dynamic base URL
 });
 
-// This is an "interceptor"
-// It runs before every request made with this 'api' instance
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('user_token');
     if (token) {
-      // If a token exists, add it to the Authorization header
       config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;

@@ -1,6 +1,7 @@
 package com.recyconnect.auth.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -11,10 +12,13 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     // Hardcoded for now based on our DataSeeder
-    private static final String ADMIN_EMAIL = "admin@recyconnect.com";
+    private static final String ADMIN_EMAIL = "recyconnecta@gmail.com";
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     public void sendPasswordResetEmail(String to, String token) {
-        String resetUrl = "http://localhost:5173/reset-password?token=" + token;
+        String resetUrl = frontendUrl + "/reset-password?token=" + token;
         String subject = "RecyConnect - Reset Your Password";
         String body = "You have requested to reset your password.\n\n"
                 + "Click the link below to set a new password:\n"
