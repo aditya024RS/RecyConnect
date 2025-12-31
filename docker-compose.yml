@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # 1. Database Service
+  postgres:
+    image: postgres:15-alpine
+    container_name: recyconnect-db
+    environment:
+      POSTGRES_DB: recyconnect_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - recyconnect-network
+
+  # 2. Backend Service
+  backend:
+    build: ./recyconnect-backend
+    container_name: recyconnect-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Override localhost with the service name 'postgres'
+      DATABASE_URL: jdbc:postgresql://postgres:5432/recyconnect_db
+      DATABASE_USERNAME: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET} 
+      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
+      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      # Tell backend where the frontend lives (for CORS)
+      FRONTEND_URL: http://localhost:5173
+    depends_on:
+      - postgres
+    networks:
+      - recyconnect-network
+    restart: on-failure
+
+  # 3. Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # During build, bake in the API URL
+        VITE_API_BASE_URL: http://localhost:8080
+    container_name: recyconnect-frontend
+    ports:
+      - "5173:80" # Map host port 5173 to container port 80 (nginx)
+    depends_on:
+      - backend
+    networks:
+      - recyconnect-network
+
+# Define a shared network so containers can talk to each other
+networks:
+  recyconnect-network:
+    driver: bridge
+
+# Persist database data even if containers are deleted
+volumes:
+  postgres_data:
